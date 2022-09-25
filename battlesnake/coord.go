@@ -1,6 +1,8 @@
-package snacks
+package battlesnake
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Coord struct {
 	X int `json:"x"`
@@ -9,6 +11,21 @@ type Coord struct {
 
 func (c Coord) String() string {
 	return fmt.Sprintf("(%d,%d)", c.X, c.Y)
+}
+
+func (c Coord) Move(move Move) Coord {
+	switch move {
+	case RIGHT:
+		return c.Right()
+	case LEFT:
+		return c.Left()
+	case UP:
+		return c.Up()
+	case DOWN:
+		return c.Down()
+	default:
+		panic("unexpected move")
+	}
 }
 
 func (c Coord) Right() Coord {

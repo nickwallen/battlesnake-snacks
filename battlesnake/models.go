@@ -1,4 +1,7 @@
-package snacks
+package battlesnake
+
+// API Objects
+// https://docs.battlesnake.com/api
 
 type Move string
 
@@ -13,12 +16,9 @@ func (m Move) String() string {
 	return string(m)
 }
 
-// API Objects
-// https://docs.battlesnake.com/api
-
 type Body []Coord
 
-type Battlesnake struct {
+type Snake struct {
 	ID             string         `json:"id"`
 	Name           string         `json:"name"`
 	Health         int            `json:"health"`
@@ -37,18 +37,18 @@ type Customizations struct {
 }
 
 type Board struct {
-	Height  int           `json:"height"`
-	Width   int           `json:"width"`
-	Food    []Coord       `json:"food"`
-	Hazards []Coord       `json:"hazards"`
-	Snakes  []Battlesnake `json:"snakes"`
+	Height  int     `json:"height"`
+	Width   int     `json:"width"`
+	Food    []Coord `json:"food"`
+	Hazards []Coord `json:"hazards"`
+	Snakes  []Snake `json:"snakes"`
 }
 
 type GameState struct {
-	Game  Game        `json:"game"`
-	Turn  int         `json:"turn"`
-	Board Board       `json:"board"`
-	You   Battlesnake `json:"you"`
+	Game  Game  `json:"game"`
+	Turn  int   `json:"turn"`
+	Board Board `json:"board"`
+	You   Snake `json:"you"`
 }
 
 type Game struct {
@@ -74,7 +74,7 @@ type RulesetSettings struct {
 // Response Objects
 // https://docs.battlesnake.com/api
 
-type BattlesnakeInfoResponse struct {
+type InfoResponse struct {
 	APIVersion string `json:"apiversion"`
 	Author     string `json:"author"`
 	Color      string `json:"color"`
@@ -82,7 +82,7 @@ type BattlesnakeInfoResponse struct {
 	Tail       string `json:"tail"`
 }
 
-type BattlesnakeMoveResponse struct {
+type MoveResponse struct {
 	Move  Move   `json:"move"`
 	Shout string `json:"shout"`
 }

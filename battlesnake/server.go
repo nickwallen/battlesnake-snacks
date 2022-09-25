@@ -1,17 +1,16 @@
-package main
+package battlesnake
 
 import (
 	"encoding/json"
-	"github.com/nickwallen/battlesnake-snacks/snacks"
 	"log"
 	"net/http"
 )
 
 type snake interface {
-	Info() snacks.BattlesnakeInfoResponse
-	Start(state snacks.GameState)
-	End(state snacks.GameState)
-	Move(state snacks.GameState) snacks.BattlesnakeMoveResponse
+	Info() InfoResponse
+	Start(state GameState)
+	End(state GameState)
+	Move(state GameState) MoveResponse
 }
 
 // SnakeServer Serves a snake for battle.
@@ -35,7 +34,7 @@ func (s *SnakeServer) HandleIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *SnakeServer) HandleStart(w http.ResponseWriter, r *http.Request) {
-	state := snacks.GameState{}
+	state := GameState{}
 	err := json.NewDecoder(r.Body).Decode(&state)
 	if err != nil {
 		log.Printf("ERROR: Failed to decode start json, %s", err)
@@ -45,7 +44,7 @@ func (s *SnakeServer) HandleStart(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *SnakeServer) HandleMove(w http.ResponseWriter, r *http.Request) {
-	state := snacks.GameState{}
+	state := GameState{}
 	err := json.NewDecoder(r.Body).Decode(&state)
 	if err != nil {
 		log.Printf("ERROR: Failed to decode move json, %s", err)
@@ -61,7 +60,7 @@ func (s *SnakeServer) HandleMove(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *SnakeServer) HandleEnd(w http.ResponseWriter, r *http.Request) {
-	state := snacks.GameState{}
+	state := GameState{}
 	err := json.NewDecoder(r.Body).Decode(&state)
 	if err != nil {
 		log.Printf("ERROR: Failed to decode end json, %s", err)
@@ -92,6 +91,6 @@ func RunServer(snake snake, port string) {
 		writer.Header().Set("Server", ServerID)
 		server.HandleEnd(writer, request)
 	})
-	log.Printf("Running Battlesnake at http://0.0.0.0:%s...\n", port)
+	log.Printf("Running Snake at http://0.0.0.0:%s...\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

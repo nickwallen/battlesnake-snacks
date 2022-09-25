@@ -1,4 +1,4 @@
-package snacks
+package battlesnake
 
 import (
 	"github.com/stretchr/testify/require"

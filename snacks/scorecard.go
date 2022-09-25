@@ -2,6 +2,7 @@ package snacks
 
 import (
 	"fmt"
+	b "github.com/nickwallen/battlesnake-snacks/battlesnake"
 	"math"
 )
 
@@ -12,25 +13,25 @@ func (s Score) String() string {
 }
 
 type Scorecard struct {
-	state       GameState
-	moves       map[Move]Score
-	defaultMove Move // the default move is played if there are no safe moves
+	state       b.GameState
+	moves       map[b.Move]Score
+	defaultMove b.Move // the default move is played if there are no safe moves
 }
 
-func NewScorecard(state GameState) *Scorecard {
+func NewScorecard(state b.GameState) *Scorecard {
 	return &Scorecard{
 		state: state,
-		moves: map[Move]Score{
-			LEFT:  0,
-			RIGHT: 0,
-			UP:    0,
-			DOWN:  0,
+		moves: map[b.Move]Score{
+			b.LEFT:  0,
+			b.RIGHT: 0,
+			b.UP:    0,
+			b.DOWN:  0,
 		},
-		defaultMove: DOWN,
+		defaultMove: b.DOWN,
 	}
 }
 
-func (s *Scorecard) Add(move Move, toAdd Score) Score {
+func (s *Scorecard) Add(move b.Move, toAdd Score) Score {
 	if current, ok := s.moves[move]; ok {
 		s.moves[move] = current + toAdd
 		return current + toAdd
@@ -40,19 +41,19 @@ func (s *Scorecard) Add(move Move, toAdd Score) Score {
 }
 
 // Unsafe Marks a move as unsafe.
-func (s *Scorecard) Unsafe(move Move) {
+func (s *Scorecard) Unsafe(move b.Move) {
 	delete(s.moves, move)
 }
 
 // Best Returns the move with the best score.
-func (s *Scorecard) Best() Move {
+func (s *Scorecard) Best() b.Move {
 	if len(s.moves) == 0 {
 		logger(s.state).Msg("No safe moves!")
 		return s.defaultMove
 	}
 
 	bestScore := Score(math.MinInt)
-	var bestMove Move
+	var bestMove b.Move
 	for move, score := range s.moves {
 		if score > bestScore {
 			bestScore = score
@@ -63,16 +64,16 @@ func (s *Scorecard) Best() Move {
 	return bestMove
 }
 
-func (s *Scorecard) SafeMoves() []Move {
-	moves := []Move{}
+func (s *Scorecard) SafeMoves() []b.Move {
+	moves := make([]b.Move, 0)
 	for k := range s.moves {
 		moves = append(moves, k)
 	}
 	return moves
 }
 
-func (s *Scorecard) Scores() map[Move]Score {
-	moves := make(map[Move]Score)
+func (s *Scorecard) Scores() map[b.Move]Score {
+	moves := make(map[b.Move]Score)
 	for k, v := range s.moves {
 		moves[k] = v
 	}

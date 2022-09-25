@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/nickwallen/battlesnake-snacks/battlesnake"
 	"github.com/nickwallen/battlesnake-snacks/snacks"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -24,17 +25,17 @@ func main() {
 	}
 
 	// Which snake will battle?
-	var snake snake
+	var snake *snacks.StrategyDrivenSnake
 	switch os.Getenv(EnvSnake) {
 	case "DUMB":
 		snake = snacks.NewDumbSnake()
 	case "HUNGRY":
 		snake = snacks.NewHungrySnake()
 	case "LATEST":
-		snake = snacks.NewNextGenSnake()
+		snake = snacks.NewLatestSnake()
 	default:
 		log.Fatal().Msgf("Env var '%s' is missing.", EnvSnake)
 	}
 
-	RunServer(snake, port)
+	battlesnake.RunServer(snake, port)
 }

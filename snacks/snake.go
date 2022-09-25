@@ -1,12 +1,13 @@
 package snacks
 
 import (
+	b "github.com/nickwallen/battlesnake-snacks/battlesnake"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
 type strategy interface {
-	move(state GameState, scorecard *Scorecard)
+	move(state b.GameState, scorecard *Scorecard)
 }
 
 type StrategyDrivenSnake struct {
@@ -42,13 +43,13 @@ func NewHungrySnake() *StrategyDrivenSnake {
 		strategies: []strategy{
 			&StayInBounds{},
 			&NoCollisions{},
-			&MoveToFood{weight: 20},
+			&MoveToClosestFood{weight: 20},
 			&MoveToCenter{weight: 10},
 		},
 	}
 }
 
-func NewNextGenSnake() *StrategyDrivenSnake {
+func NewLatestSnake() *StrategyDrivenSnake {
 	return &StrategyDrivenSnake{
 		name:   "next-gen",
 		author: "nickwallen",
@@ -58,18 +59,20 @@ func NewNextGenSnake() *StrategyDrivenSnake {
 		strategies: []strategy{
 			&StayInBounds{},
 			&NoCollisions{},
-			&MoveToFood{weight: 15},
-			&MoveToCenter{weight: 10},
-			&AvoidBiggerSnakes{weight: 20},
+			&MoveToClosestFood{weight: 5},
+			//&MoveToFood{weight: 1},
+			&MoveToCenter{weight: 4},
+			&AvoidBiggerSnakes{weight: 5},
+			&AvoidDeadEnds{weight: 1},
 		},
 	}
 }
 
-// Info is called when you create your Battlesnake on play.battlesnake.com
+// Info is called when you create your Battlesnake on play.b.com
 // and controls your Battlesnake's appearance
 // TIP: If you open your Battlesnake URL in a browser you should see this data
-func (s *StrategyDrivenSnake) Info() BattlesnakeInfoResponse {
-	return BattlesnakeInfoResponse{
+func (s *StrategyDrivenSnake) Info() b.InfoResponse {
+	return b.InfoResponse{
 		APIVersion: "1",
 		Author:     s.author,
 		Color:      s.color,
@@ -79,14 +82,14 @@ func (s *StrategyDrivenSnake) Info() BattlesnakeInfoResponse {
 }
 
 // Start is called when your Battlesnake begins a game
-func (s *StrategyDrivenSnake) Start(state GameState) {
+func (s *StrategyDrivenSnake) Start(state b.GameState) {
 	logger(state).
 		Str("snake", s.name).
 		Msg("start")
 }
 
 // End is called when your Battlesnake finishes a game
-func (s *StrategyDrivenSnake) End(state GameState) {
+func (s *StrategyDrivenSnake) End(state b.GameState) {
 	var gameResult string
 	isDraw := len(state.Board.Snakes) == 0
 	if isDraw {
@@ -106,26 +109,28 @@ func (s *StrategyDrivenSnake) End(state GameState) {
 
 // Move is called on every turn and returns your next move
 // Valid moves are UP, DOWN, LEFT, or RIGHT
-// See https://docs.battlesnake.com/api/example-move for available data
-func (s *StrategyDrivenSnake) Move(state GameState) BattlesnakeMoveResponse {
+// See https://docs.b.com/api/example-move for available data
+func (s *StrategyDrivenSnake) Move(state b.GameState) b.MoveResponse {
 	scorecard := NewScorecard(state)
 	for _, strategy := range s.strategies {
 		strategy.move(state, scorecard)
 	}
 	move := scorecard.Best()
 	logger(state).Stringer("move", move).Msg("moved")
-	return BattlesnakeMoveResponse{Move: move}
+	return b.MoveResponse{Move: move}
 }
 
-func logger(state GameState) *zerolog.Event {
+func logger(state b.GameState) *zerolog.Event {
 	event := log.Info().
 		Str("game-id", state.Game.ID).
 		Int("turn", state.Turn).
-		Stringer("head", headOfSnake(state))
+		Stringer("head", headOfSnake(state)).
+		Int("health", state.You.Health).
+		Int("length", state.You.Length)
 	return event
 }
 
-func debug(state GameState) *zerolog.Event {
+func debug(state b.GameState) *zerolog.Event {
 	event := log.Debug().
 		Str("game-id", state.Game.ID).
 		Int("turn", state.Turn).
@@ -134,6 +139,6 @@ func debug(state GameState) *zerolog.Event {
 }
 
 // head Returns the coordinates of the snake's head.
-func headOfSnake(state GameState) Coord {
+func headOfSnake(state b.GameState) b.Coord {
 	return state.You.Head
 }
