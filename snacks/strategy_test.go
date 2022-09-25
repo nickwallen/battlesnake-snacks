@@ -1,4 +1,4 @@
-package main
+package snacks
 
 import (
 	"github.com/stretchr/testify/require"
@@ -310,5 +310,99 @@ func Test_MoveToFood_MoveRightOnly(t *testing.T) {
 	require.Equal(t, Score(0), scorecard.Scores()[LEFT])
 	require.Equal(t, Score(0), scorecard.Scores()[DOWN])
 	require.Equal(t, Score(10), scorecard.Scores()[RIGHT])
+	require.Equal(t, Score(0), scorecard.Scores()[UP])
+}
+
+func Test_AvoidBiggerSnakes_BiggerSnake(t *testing.T) {
+	state := GameState{
+		Board: Board{
+			Height: 5,
+			Width:  5,
+			Snakes: []Battlesnake{
+				{
+					ID:     "bigger-snake",
+					Head:   Coord{3, 3},
+					Length: 5,
+				},
+				{
+					ID:     "you",
+					Head:   Coord{2, 2},
+					Length: 2,
+				},
+			},
+		},
+		You: Battlesnake{
+			ID:     "you",
+			Head:   Coord{2, 2},
+			Length: 2,
+		},
+	}
+	scorecard := NewScorecard(state)
+	strategy := AvoidBiggerSnakes{weight: Score(10)}
+	strategy.move(state, scorecard)
+	require.Equal(t, Score(10), scorecard.Scores()[LEFT])
+	require.Equal(t, Score(10), scorecard.Scores()[DOWN])
+	require.Equal(t, Score(0), scorecard.Scores()[RIGHT])
+	require.Equal(t, Score(0), scorecard.Scores()[UP])
+}
+
+func Test_AvoidBiggerSnakes_SmallerSnake(t *testing.T) {
+	state := GameState{
+		Board: Board{
+			Height: 5,
+			Width:  5,
+			Snakes: []Battlesnake{
+				{
+					ID:     "smaller-snake",
+					Head:   Coord{3, 3},
+					Length: 1,
+				},
+				{
+					ID:     "you",
+					Head:   Coord{2, 2},
+					Length: 2,
+				},
+			},
+		},
+		You: Battlesnake{
+			ID:     "you",
+			Head:   Coord{2, 2},
+			Length: 2,
+		},
+	}
+	scorecard := NewScorecard(state)
+	strategy := AvoidBiggerSnakes{weight: Score(10)}
+	strategy.move(state, scorecard)
+	require.Equal(t, Score(0), scorecard.Scores()[LEFT])
+	require.Equal(t, Score(0), scorecard.Scores()[DOWN])
+	require.Equal(t, Score(0), scorecard.Scores()[RIGHT])
+	require.Equal(t, Score(0), scorecard.Scores()[UP])
+}
+
+func Test_AvoidBiggerSnakes_NoSnakes(t *testing.T) {
+	state := GameState{
+		Board: Board{
+			Height: 5,
+			Width:  5,
+			Snakes: []Battlesnake{
+				{
+					ID:     "you",
+					Head:   Coord{2, 2},
+					Length: 2,
+				},
+			},
+		},
+		You: Battlesnake{
+			ID:     "you",
+			Head:   Coord{2, 2},
+			Length: 2,
+		},
+	}
+	scorecard := NewScorecard(state)
+	strategy := AvoidBiggerSnakes{weight: Score(10)}
+	strategy.move(state, scorecard)
+	require.Equal(t, Score(0), scorecard.Scores()[LEFT])
+	require.Equal(t, Score(0), scorecard.Scores()[DOWN])
+	require.Equal(t, Score(0), scorecard.Scores()[RIGHT])
 	require.Equal(t, Score(0), scorecard.Scores()[UP])
 }

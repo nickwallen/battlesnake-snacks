@@ -1,4 +1,4 @@
-package main
+package snacks
 
 import (
 	"github.com/rs/zerolog"
@@ -60,15 +60,15 @@ func NewNextGenSnake() *StrategyDrivenSnake {
 			&NoCollisions{},
 			&MoveToFood{weight: 15},
 			&MoveToCenter{weight: 10},
-			&MoveFromBiggerSnakes{weight: 20},
+			&AvoidBiggerSnakes{weight: 20},
 		},
 	}
 }
 
-// info is called when you create your Battlesnake on play.battlesnake.com
+// Info is called when you create your Battlesnake on play.battlesnake.com
 // and controls your Battlesnake's appearance
 // TIP: If you open your Battlesnake URL in a browser you should see this data
-func (s *StrategyDrivenSnake) info() BattlesnakeInfoResponse {
+func (s *StrategyDrivenSnake) Info() BattlesnakeInfoResponse {
 	return BattlesnakeInfoResponse{
 		APIVersion: "1",
 		Author:     s.author,
@@ -78,15 +78,15 @@ func (s *StrategyDrivenSnake) info() BattlesnakeInfoResponse {
 	}
 }
 
-// start is called when your Battlesnake begins a game
-func (s *StrategyDrivenSnake) start(state GameState) {
+// Start is called when your Battlesnake begins a game
+func (s *StrategyDrivenSnake) Start(state GameState) {
 	logger(state).
 		Str("snake", s.name).
 		Msg("start")
 }
 
-// end is called when your Battlesnake finishes a game
-func (s *StrategyDrivenSnake) end(state GameState) {
+// End is called when your Battlesnake finishes a game
+func (s *StrategyDrivenSnake) End(state GameState) {
 	var gameResult string
 	isDraw := len(state.Board.Snakes) == 0
 	if isDraw {
@@ -104,10 +104,10 @@ func (s *StrategyDrivenSnake) end(state GameState) {
 		Msgf("%s in %d move(s)", gameResult, state.Turn+1)
 }
 
-// move is called on every turn and returns your next move
+// Move is called on every turn and returns your next move
 // Valid moves are UP, DOWN, LEFT, or RIGHT
 // See https://docs.battlesnake.com/api/example-move for available data
-func (s *StrategyDrivenSnake) move(state GameState) BattlesnakeMoveResponse {
+func (s *StrategyDrivenSnake) Move(state GameState) BattlesnakeMoveResponse {
 	scorecard := NewScorecard(state)
 	for _, strategy := range s.strategies {
 		strategy.move(state, scorecard)
@@ -119,6 +119,14 @@ func (s *StrategyDrivenSnake) move(state GameState) BattlesnakeMoveResponse {
 
 func logger(state GameState) *zerolog.Event {
 	event := log.Info().
+		Str("game-id", state.Game.ID).
+		Int("turn", state.Turn).
+		Stringer("head", headOfSnake(state))
+	return event
+}
+
+func debug(state GameState) *zerolog.Event {
+	event := log.Debug().
 		Str("game-id", state.Game.ID).
 		Int("turn", state.Turn).
 		Stringer("head", headOfSnake(state))

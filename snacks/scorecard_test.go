@@ -1,4 +1,4 @@
-package main
+package snacks
 
 import (
 	"github.com/stretchr/testify/require"
@@ -17,14 +17,14 @@ func state() GameState {
 	}
 }
 
-func TestScorecard_Add(t *testing.T) {
+func Test_Scorecard_Add(t *testing.T) {
 	s := NewScorecard(state())
 	require.Equal(t, Score(10), s.Add(LEFT, 10))
 	require.Equal(t, Score(20), s.Add(LEFT, 10))
 	require.Equal(t, Score(30), s.Add(LEFT, 10))
 }
 
-func TestScorecard_Best(t *testing.T) {
+func Test_Scorecard_Best(t *testing.T) {
 	s := NewScorecard(state())
 	s.Add(LEFT, 10)
 	s.Add(RIGHT, 5)
@@ -33,7 +33,7 @@ func TestScorecard_Best(t *testing.T) {
 	require.Equal(t, LEFT, s.Best())
 }
 
-func TestScorecard_Unsafe(t *testing.T) {
+func Test_Scorecard_Unsafe(t *testing.T) {
 	s := NewScorecard(state())
 	s.Unsafe(LEFT)
 	s.Add(LEFT, 10)
@@ -41,7 +41,7 @@ func TestScorecard_Unsafe(t *testing.T) {
 	require.Equal(t, RIGHT, s.Best())
 }
 
-func TestScorecard_Scores(t *testing.T) {
+func Test_Scorecard_Scores(t *testing.T) {
 	s := NewScorecard(state())
 	safeMoves := s.Scores()
 	require.Equal(t, Score(0), safeMoves[LEFT])

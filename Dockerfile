@@ -1,9 +1,20 @@
 FROM golang:1.18
 
+ENV PORT=8000
+ENV SNAKE=LATEST
+
 WORKDIR /usr/src/app
 
-COPY . .
-RUN go mod download && go mod verify
-RUN go build -v -o /usr/local/bin/app ./...
+COPY go.mod .
+COPY go.sum .
+RUN go mod download && \
+    go mod verify
+
+COPY cmd ./cmd
+COPY snacks ./snacks
+
+
+RUN go test ./... && \
+    go build -v -o /usr/local/bin/app ./cmd
 
 CMD ["app"]

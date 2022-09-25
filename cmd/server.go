@@ -2,15 +2,16 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/nickwallen/battlesnake-snacks/snacks"
 	"log"
 	"net/http"
 )
 
 type snake interface {
-	info() BattlesnakeInfoResponse
-	start(state GameState)
-	end(state GameState)
-	move(state GameState) BattlesnakeMoveResponse
+	Info() snacks.BattlesnakeInfoResponse
+	Start(state snacks.GameState)
+	End(state snacks.GameState)
+	Move(state snacks.GameState) snacks.BattlesnakeMoveResponse
 }
 
 // SnakeServer Serves a snake for battle.
@@ -25,7 +26,7 @@ func NewSnakeServer(snake snake) *SnakeServer {
 }
 
 func (s *SnakeServer) HandleIndex(w http.ResponseWriter, r *http.Request) {
-	response := s.snake.info()
+	response := s.snake.Info()
 	w.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(w).Encode(response)
 	if err != nil {
@@ -34,23 +35,23 @@ func (s *SnakeServer) HandleIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *SnakeServer) HandleStart(w http.ResponseWriter, r *http.Request) {
-	state := GameState{}
+	state := snacks.GameState{}
 	err := json.NewDecoder(r.Body).Decode(&state)
 	if err != nil {
 		log.Printf("ERROR: Failed to decode start json, %s", err)
 		return
 	}
-	s.snake.start(state)
+	s.snake.Start(state)
 }
 
 func (s *SnakeServer) HandleMove(w http.ResponseWriter, r *http.Request) {
-	state := GameState{}
+	state := snacks.GameState{}
 	err := json.NewDecoder(r.Body).Decode(&state)
 	if err != nil {
 		log.Printf("ERROR: Failed to decode move json, %s", err)
 		return
 	}
-	response := s.snake.move(state)
+	response := s.snake.Move(state)
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
@@ -60,13 +61,13 @@ func (s *SnakeServer) HandleMove(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *SnakeServer) HandleEnd(w http.ResponseWriter, r *http.Request) {
-	state := GameState{}
+	state := snacks.GameState{}
 	err := json.NewDecoder(r.Body).Decode(&state)
 	if err != nil {
 		log.Printf("ERROR: Failed to decode end json, %s", err)
 		return
 	}
-	s.snake.end(state)
+	s.snake.End(state)
 }
 
 // Middleware

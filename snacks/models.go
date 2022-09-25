@@ -1,4 +1,4 @@
-package main
+package snacks
 
 type Move string
 

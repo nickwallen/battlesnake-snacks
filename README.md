@@ -6,7 +6,7 @@ An official Battlesnake template written in Go. Get started at [play.battlesnake
 
 This project is a great starting point for anyone wanting to program their first Battlesnake in Go. It can be run locally or easily deployed to a cloud provider of your choosing. See the [Battlesnake API Docs](https://docs.battlesnake.com/api) for more detail. 
 
-[![Run on Replit](https://repl.it/badge/github/BattlesnakeOfficial/starter-snake-go)](https://replit.com/@Battlesnake/starter-snake-go)
+[![Run on Replit](https://repl.it/badge/github/nickwallen/battlesnake-snacks)](https://replit.com/@nickwallen/battlesnake-snacks)
 
 ## Technologies Used
 
@@ -50,6 +50,18 @@ Continue with the [Battlesnake Quickstart Guide](https://docs.battlesnake.com/qu
 
 **Note:** To play games on [play.battlesnake.com](https://play.battlesnake.com) you'll need to deploy your Battlesnake to a live web server OR use a port forwarding tool like [ngrok](https://ngrok.com/) to access your server locally.
 
+
+## Docker
+
+```shell
+docker build . -t snakes
+```
+
+```shell
+docker run -p 8000:8000 -e PORT=8000 -t snakes
+```
+
+## Playing Locally
 
 ```sh
 

@@ -1,8 +1,13 @@
-package main
+package snacks
 
 import (
-	"github.com/rs/zerolog/log"
+	"errors"
 	"math"
+)
+
+var (
+	ErrNoBiggerSnakes = errors.New("no bigger snakes found")
+	ErrNoFood         = errors.New("no food found")
 )
 
 // StayInBounds A strategy that kee[s the snake within the game boundaries.
@@ -64,8 +69,8 @@ type MoveToFood struct {
 func (m MoveToFood) move(state GameState, scorecard *Scorecard) {
 	head := headOfSnake(state)
 	closestFood, err := findNearbyFood(state, head)
-	if err != nil {
-		return
+	if err == ErrNoFood {
+		return // Nothing to do
 	}
 
 	// Incentivize moves that take us closer to the food
@@ -83,17 +88,10 @@ func (m MoveToFood) move(state GameState, scorecard *Scorecard) {
 	}
 }
 
-type NoFoodFound struct {
-}
-
-func (n NoFoodFound) Error() string {
-	return "No food found"
-}
-
 func findNearbyFood(state GameState, head Coord) (Coord, error) {
 	var closestFood Coord
 	if len(state.Board.Food) == 0 {
-		return closestFood, NoFoodFound{}
+		return closestFood, ErrNoFood
 	}
 	minDist := math.MaxInt
 	for _, food := range state.Board.Food {
@@ -103,7 +101,7 @@ func findNearbyFood(state GameState, head Coord) (Coord, error) {
 			closestFood = food
 		}
 	}
-	log.Debug().Msgf("Found closest food: %s", closestFood)
+	debug(state).Msgf("Found closest food: %s", closestFood)
 	return closestFood, nil
 }
 
@@ -132,33 +130,36 @@ func (m *MoveToCenter) move(state GameState, scorecard *Scorecard) {
 	}
 }
 
-// MoveFromBiggerSnakes allows a snake to move away from larger snakes
-type MoveFromBiggerSnakes struct {
+// AvoidBiggerSnakes allows a snake to move away from larger snakes
+type AvoidBiggerSnakes struct {
 	weight Score
 }
 
-func (m MoveFromBiggerSnakes) move(state GameState, scorecard *Scorecard) {
+func (m AvoidBiggerSnakes) move(state GameState, scorecard *Scorecard) {
 	head := headOfSnake(state)
-	biggerSnake := findNearbySnake(state, head)
+	biggerSnake, err := findNearbySnake(state, head)
+	if err == ErrNoBiggerSnakes {
+		return // Nothing to do
+	}
 
-	// Penalize moves that take us closer to the bigger snake
+	// Incentivize moves that take us away from the bigger snake
 	if head.X > biggerSnake.X {
-		scorecard.Add(LEFT, -m.weight)
+		scorecard.Add(RIGHT, m.weight)
 	} else {
-		scorecard.Add(RIGHT, -m.weight)
+		scorecard.Add(LEFT, m.weight)
 	}
 	if head.Y > biggerSnake.Y {
-		scorecard.Add(DOWN, -m.weight)
+		scorecard.Add(UP, m.weight)
 	} else {
-		scorecard.Add(UP, -m.weight)
+		scorecard.Add(DOWN, m.weight)
 	}
 }
 
-func findNearbySnake(state GameState, head Coord) Coord {
+func findNearbySnake(state GameState, head Coord) (Coord, error) {
 	var closestSnake Coord
 	minDist := math.MaxInt
 	for _, snake := range state.Board.Snakes {
-		if snake.Length >= state.You.Length {
+		if snake.Length >= state.You.Length && snake.ID != state.You.ID {
 			dist := head.DistanceTo(snake.Head)
 			if dist < minDist {
 				minDist = dist
@@ -166,5 +167,9 @@ func findNearbySnake(state GameState, head Coord) Coord {
 			}
 		}
 	}
-	return closestSnake
+	if minDist == math.MaxInt {
+		return closestSnake, ErrNoBiggerSnakes
+	}
+	debug(state).Msgf("Found bigger snake: %s", closestSnake)
+	return closestSnake, nil
 }
