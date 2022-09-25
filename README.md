@@ -49,3 +49,28 @@ battlesnake play -W 11 -H 11 --name 'Go Starter Project' --url http://localhost:
 Continue with the [Battlesnake Quickstart Guide](https://docs.battlesnake.com/quickstart) to customize and improve your Battlesnake's behavior.
 
 **Note:** To play games on [play.battlesnake.com](https://play.battlesnake.com) you'll need to deploy your Battlesnake to a live web server OR use a port forwarding tool like [ngrok](https://ngrok.com/) to access your server locally.
+
+
+```sh
+
+battlesnake play -W 11 -H 11 -g standard \
+  --name 'Hungry 1' --url http://localhost:8000 \
+  --name 'Hungry 2' --url http://localhost:8001 \
+  --browser
+
+
+battlesnake play -W 11 -H 11 -g standard \
+  --url http://localhost:8000 \
+  --url http://localhost:8001 \
+  --browser
+
+battlesnake play -W 11 -H 11 -g standard \
+  --name 'Hungry 1' --url http://localhost:8000 \
+  --name 'Hungry 2' --url http://localhost:8001 \
+  --name 'Center' --url http://localhost:8002 \
+  --browser
+
+PORT=8001 go run .
+
+SNAKE=HUNGRY PORT=8001 go run .
+```

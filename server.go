@@ -4,14 +4,28 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"os"
 )
 
-// HTTP Handlers
+type snake interface {
+	info() BattlesnakeInfoResponse
+	start(state GameState)
+	end(state GameState)
+	move(state GameState) BattlesnakeMoveResponse
+}
 
-func HandleIndex(w http.ResponseWriter, r *http.Request) {
-	response := info()
+// SnakeServer Serves a snake for battle.
+type SnakeServer struct {
+	snake snake
+}
 
+func NewSnakeServer(snake snake) *SnakeServer {
+	return &SnakeServer{
+		snake: snake,
+	}
+}
+
+func (s *SnakeServer) HandleIndex(w http.ResponseWriter, r *http.Request) {
+	response := s.snake.info()
 	w.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(w).Encode(response)
 	if err != nil {
@@ -19,29 +33,24 @@ func HandleIndex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func HandleStart(w http.ResponseWriter, r *http.Request) {
+func (s *SnakeServer) HandleStart(w http.ResponseWriter, r *http.Request) {
 	state := GameState{}
 	err := json.NewDecoder(r.Body).Decode(&state)
 	if err != nil {
 		log.Printf("ERROR: Failed to decode start json, %s", err)
 		return
 	}
-
-	start(state)
-
-	// Nothing to respond with here
+	s.snake.start(state)
 }
 
-func HandleMove(w http.ResponseWriter, r *http.Request) {
+func (s *SnakeServer) HandleMove(w http.ResponseWriter, r *http.Request) {
 	state := GameState{}
 	err := json.NewDecoder(r.Body).Decode(&state)
 	if err != nil {
 		log.Printf("ERROR: Failed to decode move json, %s", err)
 		return
 	}
-
-	response := move(state)
-
+	response := s.snake.move(state)
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
@@ -50,43 +59,38 @@ func HandleMove(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func HandleEnd(w http.ResponseWriter, r *http.Request) {
+func (s *SnakeServer) HandleEnd(w http.ResponseWriter, r *http.Request) {
 	state := GameState{}
 	err := json.NewDecoder(r.Body).Decode(&state)
 	if err != nil {
 		log.Printf("ERROR: Failed to decode end json, %s", err)
 		return
 	}
-
-	end(state)
-
-	// Nothing to respond with here
+	s.snake.end(state)
 }
 
 // Middleware
 
 const ServerID = "battlesnake/github/starter-snake-go"
 
-func withServerID(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Server", ServerID)
-		next(w, r)
-	}
-}
-
-// Start Battlesnake Server
-
-func RunServer() {
-	port := os.Getenv("PORT")
-	if len(port) == 0 {
-		port = "8000"
-	}
-
-	http.HandleFunc("/", withServerID(HandleIndex))
-	http.HandleFunc("/start", withServerID(HandleStart))
-	http.HandleFunc("/move", withServerID(HandleMove))
-	http.HandleFunc("/end", withServerID(HandleEnd))
-
+func RunServer(snake snake, port string) {
+	server := NewSnakeServer(snake)
+	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Server", ServerID)
+		server.HandleIndex(writer, request)
+	})
+	http.HandleFunc("/start", func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Server", ServerID)
+		server.HandleStart(writer, request)
+	})
+	http.HandleFunc("/move", func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Server", ServerID)
+		server.HandleMove(writer, request)
+	})
+	http.HandleFunc("/end", func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Server", ServerID)
+		server.HandleEnd(writer, request)
+	})
 	log.Printf("Running Battlesnake at http://0.0.0.0:%s...\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

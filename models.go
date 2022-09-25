@@ -1,18 +1,28 @@
 package main
 
+type Move string
+
+const (
+	UP    Move = "up"
+	DOWN  Move = "down"
+	LEFT  Move = "left"
+	RIGHT Move = "right"
+)
+
+func (m Move) String() string {
+	return string(m)
+}
+
 // API Objects
 // https://docs.battlesnake.com/api
 
-type Coord struct {
-	X int `json:"x"`
-	Y int `json:"y"`
-}
+type Body []Coord
 
 type Battlesnake struct {
 	ID             string         `json:"id"`
 	Name           string         `json:"name"`
 	Health         int            `json:"health"`
-	Body           []Coord        `json:"body"`
+	Body           Body           `json:"body"`
 	Head           Coord          `json:"head"`
 	Length         int            `json:"length"`
 	Latency        string         `json:"latency"`
@@ -73,6 +83,6 @@ type BattlesnakeInfoResponse struct {
 }
 
 type BattlesnakeMoveResponse struct {
-	Move  string `json:"move"`
+	Move  Move   `json:"move"`
 	Shout string `json:"shout"`
 }
