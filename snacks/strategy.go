@@ -3,7 +3,6 @@ package snacks
 import (
 	"errors"
 	b "github.com/nickwallen/battlesnake-snacks/battlesnake"
-	"github.com/rs/zerolog/log"
 	"math"
 )
 
@@ -109,26 +108,26 @@ func findNearbyFood(state b.GameState, head b.Coord) (b.Coord, error) {
 
 // MoveToCenter snakes should prefer moving toward the center.
 type MoveToCenter struct {
-	weight Score
+	weight float64
 }
 
 func (m *MoveToCenter) move(state b.GameState, scorecard *Scorecard) {
 	head := headOfSnake(state)
-	centerX := float32(state.Board.Width) / float32(2)
-	offsetX := float32(head.X) - centerX
+	centerX := float64(state.Board.Width) / float64(2)
+	offsetX := float64(head.X) - centerX
 	if offsetX < 0 {
-		scorecard.Add(b.RIGHT, m.weight)
+		scorecard.Add(b.RIGHT, Score(m.weight*-offsetX))
 	}
 	if offsetX > 0 {
-		scorecard.Add(b.LEFT, m.weight)
+		scorecard.Add(b.LEFT, Score(m.weight*offsetX))
 	}
-	centerY := float32(state.Board.Height) / float32(2)
-	offsetY := float32(head.Y) - centerY
+	centerY := float64(state.Board.Height) / float64(2)
+	offsetY := float64(head.Y) - centerY
 	if offsetY < 0 {
-		scorecard.Add(b.UP, m.weight)
+		scorecard.Add(b.UP, Score(m.weight*-offsetY))
 	}
 	if offsetY > 0 {
-		scorecard.Add(b.DOWN, m.weight)
+		scorecard.Add(b.DOWN, Score(m.weight*offsetY))
 	}
 }
 
@@ -183,27 +182,29 @@ func findNearbySnake(state b.GameState, head b.Coord) (b.Snake, error) {
 }
 
 type AvoidDeadEnds struct {
-	weight Score
+	weight float64
 }
 
 func (a AvoidDeadEnds) move(state b.GameState, scorecard *Scorecard) {
 	board := NewBoard(state)
 	head := headOfSnake(state)
 
-	spaceRight := availableSpace(head.Right(), board)
-	scorecard.Add(b.RIGHT, Score(spaceRight)*a.weight)
+	spaceRight := availableSpace(head.Right(), board) * a.weight
+	scorecard.Add(b.RIGHT, Score(spaceRight))
 
-	spaceLeft := availableSpace(head.Left(), board)
-	scorecard.Add(b.LEFT, Score(spaceLeft)*a.weight)
+	spaceLeft := availableSpace(head.Left(), board) * a.weight
+	scorecard.Add(b.LEFT, Score(spaceLeft))
 
-	spaceDown := availableSpace(head.Down(), board)
-	scorecard.Add(b.DOWN, Score(spaceDown)*a.weight)
+	spaceBelow := availableSpace(head.Down(), board) * a.weight
+	scorecard.Add(b.DOWN, Score(spaceBelow))
 
-	spaceUp := availableSpace(head.Up(), board)
-	scorecard.Add(b.UP, Score(spaceUp)*a.weight)
+	spaceAbove := availableSpace(head.Up(), board) * a.weight
+	scorecard.Add(b.UP, Score(spaceAbove))
+	debug(state).Msgf("Moving to available space %s=%f, %s=%f, %s=%f, %s=%f",
+		b.LEFT, spaceLeft, b.RIGHT, spaceRight, b.UP, spaceAbove, b.DOWN, spaceBelow)
 }
 
-func availableSpace(start b.Coord, board *Board) int {
+func availableSpace(start b.Coord, board *Board) float64 {
 	visited := make(map[b.Coord]bool, 0)
 	space := 0
 	toVisit := make([]b.Coord, 0)
@@ -221,7 +222,7 @@ func availableSpace(start b.Coord, board *Board) int {
 			}
 		}
 	}
-	return space
+	return float64(space)
 }
 
 type Board struct {
@@ -282,7 +283,7 @@ func (m MoveToFood) move(state b.GameState, scorecard *Scorecard) {
 	head := headOfSnake(state)
 	maxDist := state.Board.Width + state.Board.Height - 2
 	for _, food := range state.Board.Food {
-		// Should be greater, the closer we are to food
+		// The closer the food, the greater the weight
 		foodWeight := float64(maxDist-head.DistanceTo(food)) * m.weight
 		if food.X > head.X {
 			foodToRight += foodWeight
@@ -299,10 +300,11 @@ func (m MoveToFood) move(state b.GameState, scorecard *Scorecard) {
 	}
 
 	// Update the scorecard
-	log.Debug().Msgf("Found food(s) %s=%f, %s=%f, %s=%f, %s=%f",
-		b.RIGHT, foodToRight, b.LEFT, foodToLeft, b.UP, foodAbove, b.DOWN, foodBelow)
 	scorecard.Add(b.RIGHT, Score(foodToRight))
 	scorecard.Add(b.LEFT, Score(foodToLeft))
 	scorecard.Add(b.UP, Score(foodAbove))
 	scorecard.Add(b.DOWN, Score(foodBelow))
+
+	debug(state).Msgf("Moving to food %s=%f, %s=%f, %s=%f, %s=%f",
+		b.LEFT, foodToLeft, b.RIGHT, foodToRight, b.UP, foodAbove, b.DOWN, foodBelow)
 }

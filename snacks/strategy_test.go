@@ -162,10 +162,10 @@ func Test_MoveToCenter_BottomLeft(t *testing.T) {
 		},
 	}
 	scorecard := NewScorecard(state)
-	strategy := MoveToCenter{weight: Score(10)}
+	strategy := MoveToCenter{weight: 1.5}
 	strategy.move(state, scorecard)
-	require.Equal(t, Score(10), scorecard.Scores()[b.RIGHT])
-	require.Equal(t, Score(10), scorecard.Scores()[b.UP])
+	require.Equal(t, Score(2), scorecard.Scores()[b.RIGHT])
+	require.Equal(t, Score(2), scorecard.Scores()[b.UP])
 	require.Equal(t, Score(0), scorecard.Scores()[b.LEFT])
 	require.Equal(t, Score(0), scorecard.Scores()[b.DOWN])
 }
@@ -181,10 +181,10 @@ func Test_MoveToCenter_BottomRight(t *testing.T) {
 		},
 	}
 	scorecard := NewScorecard(state)
-	strategy := MoveToCenter{weight: Score(10)}
+	strategy := MoveToCenter{weight: 1.5}
 	strategy.move(state, scorecard)
-	require.Equal(t, Score(10), scorecard.Scores()[b.LEFT])
-	require.Equal(t, Score(10), scorecard.Scores()[b.UP])
+	require.Equal(t, Score(2), scorecard.Scores()[b.LEFT])
+	require.Equal(t, Score(2), scorecard.Scores()[b.UP])
 	require.Equal(t, Score(0), scorecard.Scores()[b.RIGHT])
 	require.Equal(t, Score(0), scorecard.Scores()[b.DOWN])
 }
@@ -200,10 +200,10 @@ func Test_MoveToCenter_TopRight(t *testing.T) {
 		},
 	}
 	scorecard := NewScorecard(state)
-	strategy := MoveToCenter{weight: Score(10)}
+	strategy := MoveToCenter{weight: 1.5}
 	strategy.move(state, scorecard)
-	require.Equal(t, Score(10), scorecard.Scores()[b.LEFT])
-	require.Equal(t, Score(10), scorecard.Scores()[b.DOWN])
+	require.Equal(t, Score(2), scorecard.Scores()[b.LEFT])
+	require.Equal(t, Score(2), scorecard.Scores()[b.DOWN])
 	require.Equal(t, Score(0), scorecard.Scores()[b.RIGHT])
 	require.Equal(t, Score(0), scorecard.Scores()[b.UP])
 }
@@ -219,7 +219,7 @@ func Test_MoveToCenter_Center(t *testing.T) {
 		},
 	}
 	scorecard := NewScorecard(state)
-	strategy := MoveToCenter{weight: Score(10)}
+	strategy := MoveToCenter{weight: 1.5}
 	strategy.move(state, scorecard)
 	require.Equal(t, Score(0), scorecard.Scores()[b.LEFT])
 	require.Equal(t, Score(0), scorecard.Scores()[b.DOWN])
@@ -481,9 +481,9 @@ func Test_AvoidDeadEnds(t *testing.T) {
 		},
 	}
 	scorecard := NewScorecard(state)
-	strategy := AvoidDeadEnds{weight: Score(1)}
+	strategy := AvoidDeadEnds{weight: 1.5}
 	strategy.move(state, scorecard)
-	require.Equal(t, Score(4), scorecard.Scores()[b.UP])
+	require.Equal(t, Score(6), scorecard.Scores()[b.UP])
 	require.Equal(t, Score(1), scorecard.Scores()[b.DOWN])
 	require.Equal(t, Score(0), scorecard.Scores()[b.LEFT])
 	require.Equal(t, Score(0), scorecard.Scores()[b.RIGHT])
