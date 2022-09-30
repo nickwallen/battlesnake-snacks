@@ -570,7 +570,7 @@ func Test_AvoidDeadEnds_DeadEnd(t *testing.T) {
 	strategy.move(state, scorecard)
 
 	// Right is a dead-end!
-	require.NotContains(t, b.RIGHT, scorecard.SafeMoves())
+	require.NotContains(t, scorecard.SafeMoves(), b.RIGHT)
 }
 
 func Test_AvoidDeadEnds_NotADeadEnd(t *testing.T) {

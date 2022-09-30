@@ -192,21 +192,25 @@ func (m AvoidDeadEnds) move(state b.GameState, scorecard *Scorecard) {
 
 	spaceLeft := availableSpace(head.Left(), board)
 	if spaceLeft <= state.You.Length {
+		scorecard.Unsafe(b.LEFT)
 		debug(state).Msgf("Dead-end to the left! Have %d square(s), need %d", spaceLeft, state.You.Length)
 	}
 
 	spaceRight := availableSpace(head.Right(), board)
 	if spaceRight <= state.You.Length {
+		scorecard.Unsafe(b.RIGHT)
 		debug(state).Msgf("Dead-end to the right! Have %d square(s), need %d", spaceRight, state.You.Length)
 	}
 
 	spaceUp := availableSpace(head.Up(), board)
 	if spaceUp <= state.You.Length {
+		scorecard.Unsafe(b.UP)
 		debug(state).Msgf("Dead-end up! Have %d square(s), need %d", spaceRight, state.You.Length)
 	}
 
 	spaceDown := availableSpace(head.Down(), board)
 	if spaceDown <= state.You.Length {
+		scorecard.Unsafe(b.DOWN)
 		debug(state).Msgf("Dead-end down! Have %d square(s), need %d", spaceRight, state.You.Length)
 	}
 }
