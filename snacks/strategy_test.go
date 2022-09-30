@@ -501,7 +501,7 @@ func Test_MoveToFood_NoFood(t *testing.T) {
 		},
 	}
 	scorecard := NewScorecard(state)
-	strategy := MoveToFood{weight: Score(1)}
+	strategy := MoveToFood{weight: 1.5}
 	strategy.move(state, scorecard)
 	require.Equal(t, Score(0), scorecard.Scores()[b.LEFT])
 	require.Equal(t, Score(0), scorecard.Scores()[b.DOWN])
@@ -524,10 +524,10 @@ func Test_MoveToFood_WithFood(t *testing.T) {
 		},
 	}
 	scorecard := NewScorecard(state)
-	strategy := MoveToFood{weight: Score(1)}
+	strategy := MoveToFood{weight: 1.5}
 	strategy.move(state, scorecard)
-	require.Equal(t, Score(1), scorecard.Scores()[b.LEFT])
-	require.Equal(t, Score(1), scorecard.Scores()[b.DOWN])
-	require.Equal(t, Score(1), scorecard.Scores()[b.RIGHT])
-	require.Equal(t, Score(1), scorecard.Scores()[b.UP])
+	require.Equal(t, Score(9), scorecard.Scores()[b.LEFT])
+	require.Equal(t, Score(9), scorecard.Scores()[b.DOWN])
+	require.Equal(t, Score(6), scorecard.Scores()[b.RIGHT])
+	require.Equal(t, Score(6), scorecard.Scores()[b.UP])
 }

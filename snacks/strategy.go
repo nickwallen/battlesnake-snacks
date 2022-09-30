@@ -274,32 +274,35 @@ func (b *Board) isEmpty(coord b.Coord) bool {
 
 // MoveToFood allows a snake to prefer moves where more food exists.
 type MoveToFood struct {
-	weight Score
+	weight float64
 }
 
 func (m MoveToFood) move(state b.GameState, scorecard *Scorecard) {
-	var foodToRight, foodToLeft, foodAbove, foodBelow = 0, 0, 0, 0
+	var foodToRight, foodToLeft, foodAbove, foodBelow = 0.0, 0.0, 0.0, 0.0
 	head := headOfSnake(state)
+	maxDist := state.Board.Width + state.Board.Height - 2
 	for _, food := range state.Board.Food {
+		// Should be greater, the closer we are to food
+		foodWeight := float64(maxDist-head.DistanceTo(food)) * m.weight
 		if food.X > head.X {
-			foodToRight += 1
+			foodToRight += foodWeight
 		}
 		if food.X < head.X {
-			foodToLeft += 1
+			foodToLeft += foodWeight
 		}
 		if food.Y > head.Y {
-			foodAbove += 1
+			foodAbove += foodWeight
 		}
 		if food.Y < head.Y {
-			foodBelow += 1
+			foodBelow += foodWeight
 		}
 	}
 
 	// Update the scorecard
-	log.Debug().Msgf("Found food(s) %s=%d, %s=%d, %s=%d, %s=%d",
+	log.Debug().Msgf("Found food(s) %s=%f, %s=%f, %s=%f, %s=%f",
 		b.RIGHT, foodToRight, b.LEFT, foodToLeft, b.UP, foodAbove, b.DOWN, foodBelow)
-	scorecard.Add(b.RIGHT, Score(foodToRight)*m.weight)
-	scorecard.Add(b.LEFT, Score(foodToLeft)*m.weight)
-	scorecard.Add(b.UP, Score(foodAbove)*m.weight)
-	scorecard.Add(b.DOWN, Score(foodBelow)*m.weight)
+	scorecard.Add(b.RIGHT, Score(foodToRight))
+	scorecard.Add(b.LEFT, Score(foodToLeft))
+	scorecard.Add(b.UP, Score(foodAbove))
+	scorecard.Add(b.DOWN, Score(foodBelow))
 }
