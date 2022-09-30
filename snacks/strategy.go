@@ -36,28 +36,34 @@ type NoCollisions struct {
 }
 
 func (a *NoCollisions) move(state b.GameState, scorecard *Scorecard) {
-	// Avoid other snakes and the snake itself
-	var avoid []b.Body
-	for _, opponent := range state.Board.Snakes {
-		avoid = append(avoid, opponent.Body)
+	var avoid []b.Coord
+
+	// Avoid self collisions, other snakes and hazards
+	for _, square := range state.You.Body {
+		avoid = append(avoid, square)
 	}
-	avoid = append(avoid, state.You.Body)
+	for _, opponent := range state.Board.Snakes {
+		for _, square := range opponent.Body {
+			avoid = append(avoid, square)
+		}
+	}
+	for _, hazard := range state.Board.Hazards {
+		avoid = append(avoid, hazard)
+	}
 
 	head := headOfSnake(state)
-	for _, body := range avoid {
-		for _, coord := range body {
-			if head.Right() == coord {
-				scorecard.Unsafe(b.RIGHT)
-			}
-			if head.Left() == coord {
-				scorecard.Unsafe(b.LEFT)
-			}
-			if head.Up() == coord {
-				scorecard.Unsafe(b.UP)
-			}
-			if head.Down() == coord {
-				scorecard.Unsafe(b.DOWN)
-			}
+	for _, square := range avoid {
+		if head.Right() == square {
+			scorecard.Unsafe(b.RIGHT)
+		}
+		if head.Left() == square {
+			scorecard.Unsafe(b.LEFT)
+		}
+		if head.Up() == square {
+			scorecard.Unsafe(b.UP)
+		}
+		if head.Down() == square {
+			scorecard.Unsafe(b.DOWN)
 		}
 	}
 }
