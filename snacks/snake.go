@@ -59,9 +59,8 @@ func NewLatestSnake() *StrategyDrivenSnake {
 		strategies: []strategy{
 			&StayInBounds{},
 			&NoCollisions{},
-			&MoveToCenter{weight: 0.5},
-			&MoveToFood{weight: 1.0},
-			&AvoidBiggerSnakes{weight: 1.0},
+			&MoveToFood{weight: 1.5},
+			&AvoidBiggerSnakes{weight: 1.5},
 			&AvoidDeadEnds{weight: 1},
 		},
 	}

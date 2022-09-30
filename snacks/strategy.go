@@ -133,34 +133,47 @@ func (m *MoveToCenter) move(state b.GameState, scorecard *Scorecard) {
 
 // AvoidBiggerSnakes allows a snake to move away from larger snakes
 type AvoidBiggerSnakes struct {
-	weight float32
+	weight float64
 }
 
 func (m AvoidBiggerSnakes) move(state b.GameState, scorecard *Scorecard) {
+	var rightWeight, leftWeight, aboveWeight, belowWeight = 0.0, 0.0, 0.0, 0.0
 	head := headOfSnake(state)
-	biggerSnake, err := findNearbySnake(state, head)
-	if err == ErrNoBiggerSnakes {
-		return // Nothing to do
-	}
-
-	// The closer the snake is, the greater the incentive should be to move away
-	dist := head.DistanceTo(biggerSnake.Head)
 	maxDist := state.Board.Width + state.Board.Height - 2
-	weight := Score(m.weight * float32(maxDist-dist))
+	for _, snake := range state.Board.Snakes {
+		if state.You.Length > snake.Length {
+			continue // Ignore smaller snakes
+		}
+		if snake.ID == state.You.ID {
+			continue // Ignore yourself
+		}
 
-	// Incentivize moves away from the bigger snake
-	if head.X > biggerSnake.Head.X {
-		scorecard.Add(b.RIGHT, weight)
-	} else {
-		scorecard.Add(b.LEFT, weight)
-	}
-	if head.Y > biggerSnake.Head.Y {
-		scorecard.Add(b.UP, weight)
-	} else {
-		scorecard.Add(b.DOWN, weight)
+		// The closer the snake is, the greater the incentive should be to move away
+		dist := head.DistanceTo(snake.Head)
+		weight := m.weight * float64(maxDist-dist)
+		debug(state).Msgf("Found bigger snake at %s, %d block(s) away", snake.Head, dist)
+
+		// Incentivize moves away from the bigger snake
+		if head.X > snake.Head.X {
+			rightWeight += weight
+		} else {
+			leftWeight += weight
+		}
+		if head.Y > snake.Head.Y {
+			aboveWeight += weight
+		} else {
+			belowWeight += weight
+		}
 	}
 
-	debug(state).Msgf("Found bigger snake at %s, %d block(s) away, weight %d", biggerSnake.Head, dist, weight)
+	// Update the scorecard
+	scorecard.Add(b.RIGHT, Score(rightWeight))
+	scorecard.Add(b.LEFT, Score(leftWeight))
+	scorecard.Add(b.UP, Score(aboveWeight))
+	scorecard.Add(b.DOWN, Score(belowWeight))
+
+	debug(state).Msgf("Moving away from snakes %s=%f, %s=%f, %s=%f, %s=%f",
+		b.LEFT, leftWeight, b.RIGHT, rightWeight, b.UP, aboveWeight, b.DOWN, belowWeight)
 }
 
 func findNearbySnake(state b.GameState, head b.Coord) (b.Snake, error) {
@@ -200,7 +213,7 @@ func (a AvoidDeadEnds) move(state b.GameState, scorecard *Scorecard) {
 
 	spaceAbove := availableSpace(head.Up(), board) * a.weight
 	scorecard.Add(b.UP, Score(spaceAbove))
-	debug(state).Msgf("Moving to available space %s=%f, %s=%f, %s=%f, %s=%f",
+	debug(state).Msgf("Moving to space %s=%f, %s=%f, %s=%f, %s=%f",
 		b.LEFT, spaceLeft, b.RIGHT, spaceRight, b.UP, spaceAbove, b.DOWN, spaceBelow)
 }
 
