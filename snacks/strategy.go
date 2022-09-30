@@ -176,24 +176,6 @@ func (m AvoidBiggerSnakes) move(state b.GameState, scorecard *Scorecard) {
 		b.LEFT, leftWeight, b.RIGHT, rightWeight, b.UP, aboveWeight, b.DOWN, belowWeight)
 }
 
-func findNearbySnake(state b.GameState, head b.Coord) (b.Snake, error) {
-	var closestSnake b.Snake
-	minDist := math.MaxInt
-	for _, snake := range state.Board.Snakes {
-		if snake.Length >= state.You.Length && snake.ID != state.You.ID {
-			dist := head.DistanceTo(snake.Head)
-			if dist < minDist {
-				minDist = dist
-				closestSnake = snake
-			}
-		}
-	}
-	if minDist == math.MaxInt {
-		return closestSnake, ErrNoBiggerSnakes
-	}
-	return closestSnake, nil
-}
-
 type AvoidDeadEnds struct {
 	weight float64
 }
@@ -213,6 +195,7 @@ func (a AvoidDeadEnds) move(state b.GameState, scorecard *Scorecard) {
 
 	spaceAbove := availableSpace(head.Up(), board) * a.weight
 	scorecard.Add(b.UP, Score(spaceAbove))
+
 	debug(state).Msgf("Moving to space %s=%f, %s=%f, %s=%f, %s=%f",
 		b.LEFT, spaceLeft, b.RIGHT, spaceRight, b.UP, spaceAbove, b.DOWN, spaceBelow)
 }
