@@ -3,7 +3,7 @@ test:
 	go test ./...
 
 run:
-	go run ./cmd
+	PORT=80 SNAKE=LATEST go run ./cmd
 
 battle:
 	battlesnake play \
