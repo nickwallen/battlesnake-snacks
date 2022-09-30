@@ -62,7 +62,7 @@ func NewLatestSnake() *StrategyDrivenSnake {
 			&MoveToClosestFood{weight: 5},
 			//&MoveToFood{weight: 1},
 			&MoveToCenter{weight: 4},
-			&AvoidBiggerSnakes{weight: 5},
+			&AvoidBiggerSnakes{weight: 1.0},
 			&AvoidDeadEnds{weight: 1},
 		},
 	}

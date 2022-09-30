@@ -339,7 +339,7 @@ func Test_AvoidBiggerSnakes_BiggerSnake(t *testing.T) {
 		},
 	}
 	scorecard := NewScorecard(state)
-	strategy := AvoidBiggerSnakes{weight: Score(1)}
+	strategy := AvoidBiggerSnakes{weight: 1.0}
 	strategy.move(state, scorecard)
 	require.Equal(t, Score(6), scorecard.Scores()[b.LEFT])
 	require.Equal(t, Score(6), scorecard.Scores()[b.DOWN])
@@ -372,7 +372,7 @@ func Test_AvoidBiggerSnakes_SmallerSnake(t *testing.T) {
 		},
 	}
 	scorecard := NewScorecard(state)
-	strategy := AvoidBiggerSnakes{weight: Score(10)}
+	strategy := AvoidBiggerSnakes{weight: 1.0}
 	strategy.move(state, scorecard)
 	require.Equal(t, Score(0), scorecard.Scores()[b.LEFT])
 	require.Equal(t, Score(0), scorecard.Scores()[b.DOWN])
@@ -400,7 +400,7 @@ func Test_AvoidBiggerSnakes_NoSnakes(t *testing.T) {
 		},
 	}
 	scorecard := NewScorecard(state)
-	strategy := AvoidBiggerSnakes{weight: Score(10)}
+	strategy := AvoidBiggerSnakes{weight: 1.0}
 	strategy.move(state, scorecard)
 	require.Equal(t, Score(0), scorecard.Scores()[b.LEFT])
 	require.Equal(t, Score(0), scorecard.Scores()[b.DOWN])

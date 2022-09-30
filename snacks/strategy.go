@@ -134,7 +134,7 @@ func (m *MoveToCenter) move(state b.GameState, scorecard *Scorecard) {
 
 // AvoidBiggerSnakes allows a snake to move away from larger snakes
 type AvoidBiggerSnakes struct {
-	weight Score
+	weight float32
 }
 
 func (m AvoidBiggerSnakes) move(state b.GameState, scorecard *Scorecard) {
@@ -147,7 +147,7 @@ func (m AvoidBiggerSnakes) move(state b.GameState, scorecard *Scorecard) {
 	// The closer the snake is, the greater the incentive should be to move away
 	dist := head.DistanceTo(biggerSnake.Head)
 	maxDist := state.Board.Width + state.Board.Height - 2
-	weight := m.weight * Score(maxDist-dist)
+	weight := Score(m.weight * float32(maxDist-dist))
 
 	// Incentivize moves away from the bigger snake
 	if head.X > biggerSnake.Head.X {
