@@ -339,10 +339,10 @@ func Test_AvoidBiggerSnakes_BiggerSnake(t *testing.T) {
 		},
 	}
 	scorecard := NewScorecard(state)
-	strategy := AvoidBiggerSnakes{weight: Score(10)}
+	strategy := AvoidBiggerSnakes{weight: Score(1)}
 	strategy.move(state, scorecard)
-	require.Equal(t, Score(10), scorecard.Scores()[b.LEFT])
-	require.Equal(t, Score(10), scorecard.Scores()[b.DOWN])
+	require.Equal(t, Score(6), scorecard.Scores()[b.LEFT])
+	require.Equal(t, Score(6), scorecard.Scores()[b.DOWN])
 	require.Equal(t, Score(0), scorecard.Scores()[b.RIGHT])
 	require.Equal(t, Score(0), scorecard.Scores()[b.UP])
 }

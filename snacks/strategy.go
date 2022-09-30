@@ -144,35 +144,41 @@ func (m AvoidBiggerSnakes) move(state b.GameState, scorecard *Scorecard) {
 		return // Nothing to do
 	}
 
-	// Incentivize moves that take us away from the bigger snake
-	if head.X > biggerSnake.X {
-		scorecard.Add(b.RIGHT, m.weight)
+	// The closer the snake is, the greater the incentive should be to move away
+	dist := head.DistanceTo(biggerSnake.Head)
+	maxDist := state.Board.Width + state.Board.Height - 2
+	weight := m.weight * Score(maxDist-dist)
+
+	// Incentivize moves away from the bigger snake
+	if head.X > biggerSnake.Head.X {
+		scorecard.Add(b.RIGHT, weight)
 	} else {
-		scorecard.Add(b.LEFT, m.weight)
+		scorecard.Add(b.LEFT, weight)
 	}
-	if head.Y > biggerSnake.Y {
-		scorecard.Add(b.UP, m.weight)
+	if head.Y > biggerSnake.Head.Y {
+		scorecard.Add(b.UP, weight)
 	} else {
-		scorecard.Add(b.DOWN, m.weight)
+		scorecard.Add(b.DOWN, weight)
 	}
+
+	debug(state).Msgf("Found bigger snake at %s, %d block(s) away, weight %d", biggerSnake.Head, dist, weight)
 }
 
-func findNearbySnake(state b.GameState, head b.Coord) (b.Coord, error) {
-	var closestSnake b.Coord
+func findNearbySnake(state b.GameState, head b.Coord) (b.Snake, error) {
+	var closestSnake b.Snake
 	minDist := math.MaxInt
 	for _, snake := range state.Board.Snakes {
 		if snake.Length >= state.You.Length && snake.ID != state.You.ID {
 			dist := head.DistanceTo(snake.Head)
 			if dist < minDist {
 				minDist = dist
-				closestSnake = snake.Head
+				closestSnake = snake
 			}
 		}
 	}
 	if minDist == math.MaxInt {
 		return closestSnake, ErrNoBiggerSnakes
 	}
-	debug(state).Msgf("Found bigger snake: %s", closestSnake)
 	return closestSnake, nil
 }
 
