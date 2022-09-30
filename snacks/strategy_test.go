@@ -531,3 +531,83 @@ func Test_MoveToFood_WithFood(t *testing.T) {
 	require.Equal(t, Score(6), scorecard.Scores()[b.RIGHT])
 	require.Equal(t, Score(6), scorecard.Scores()[b.UP])
 }
+
+func Test_AvoidDeadEnds_DeadEnd(t *testing.T) {
+	state := b.GameState{
+		Board: b.Board{
+			Height: 5,
+			Width:  5,
+			Snakes: []b.Snake{
+				{
+					ID:   "you",
+					Head: b.Coord{2, 1},
+					Body: []b.Coord{
+						{2, 1},
+						{1, 1},
+					},
+					Length: 2,
+				},
+			},
+			Hazards: []b.Coord{
+				{3, 0},
+				{3, 2},
+				{4, 0},
+				{4, 2},
+			},
+		},
+		You: b.Snake{
+			ID:   "you",
+			Head: b.Coord{2, 1},
+			Body: []b.Coord{
+				{2, 1},
+				{1, 1},
+			},
+			Length: 2,
+		},
+	}
+	scorecard := NewScorecard(state)
+	strategy := AvoidDeadEnds{}
+	strategy.move(state, scorecard)
+
+	// Right is a dead-end!
+	require.NotContains(t, b.RIGHT, scorecard.SafeMoves())
+}
+
+func Test_AvoidDeadEnds_NotADeadEnd(t *testing.T) {
+	state := b.GameState{
+		Board: b.Board{
+			Height: 5,
+			Width:  5,
+			Snakes: []b.Snake{
+				{
+					ID:   "you",
+					Head: b.Coord{2, 1},
+					Body: []b.Coord{
+						{1, 1},
+						{0, 1},
+					},
+					Length: 2,
+				},
+			},
+			Hazards: []b.Coord{
+				{3, 0},
+				{3, 2},
+				{4, 0},
+				{4, 2},
+			},
+		},
+		You: b.Snake{
+			ID:   "you",
+			Head: b.Coord{2, 1},
+			Body: []b.Coord{
+				{2, 1},
+				{1, 1},
+			},
+			Length: 2,
+		},
+	}
+	scorecard := NewScorecard(state)
+	strategy := AvoidDeadEnds{}
+	strategy.move(state, scorecard)
+	require.Contains(t, scorecard.SafeMoves(), b.RIGHT)
+}

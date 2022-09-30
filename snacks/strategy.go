@@ -189,9 +189,25 @@ type AvoidDeadEnds struct {
 func (m AvoidDeadEnds) move(state b.GameState, scorecard *Scorecard) {
 	board := NewBoard(state)
 	head := headOfSnake(state)
-	spaceToRight := availableSpace(head.Right(), board)
-	if spaceToRight < state.You.Length {
 
+	spaceLeft := availableSpace(head.Left(), board)
+	if spaceLeft <= state.You.Length {
+		debug(state).Msgf("Dead-end to the left! Have %d square(s), need %d", spaceLeft, state.You.Length)
+	}
+
+	spaceRight := availableSpace(head.Right(), board)
+	if spaceRight <= state.You.Length {
+		debug(state).Msgf("Dead-end to the right! Have %d square(s), need %d", spaceRight, state.You.Length)
+	}
+
+	spaceUp := availableSpace(head.Up(), board)
+	if spaceUp <= state.You.Length {
+		debug(state).Msgf("Dead-end up! Have %d square(s), need %d", spaceRight, state.You.Length)
+	}
+
+	spaceDown := availableSpace(head.Down(), board)
+	if spaceDown <= state.You.Length {
+		debug(state).Msgf("Dead-end down! Have %d square(s), need %d", spaceRight, state.You.Length)
 	}
 }
 
