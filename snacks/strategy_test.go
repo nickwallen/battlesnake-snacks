@@ -449,7 +449,7 @@ func Test_Board_OutOfBounds(t *testing.T) {
 	require.Equal(t, false, board.isEmpty(b.Coord{-1, -2}))
 }
 
-func Test_AvoidDeadEnds(t *testing.T) {
+func Test_MoveToSpace(t *testing.T) {
 	state := b.GameState{
 		Board: b.Board{
 			Height: 3,
@@ -481,7 +481,7 @@ func Test_AvoidDeadEnds(t *testing.T) {
 		},
 	}
 	scorecard := NewScorecard(state)
-	strategy := AvoidDeadEnds{weight: 1.5}
+	strategy := MoveToSpace{weight: 1.5}
 	strategy.move(state, scorecard)
 	require.Equal(t, Score(6), scorecard.Scores()[b.UP])
 	require.Equal(t, Score(1), scorecard.Scores()[b.DOWN])

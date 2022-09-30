@@ -143,7 +143,7 @@ type AvoidBiggerSnakes struct {
 }
 
 func (m AvoidBiggerSnakes) move(state b.GameState, scorecard *Scorecard) {
-	var rightWeight, leftWeight, aboveWeight, belowWeight = 0.0, 0.0, 0.0, 0.0
+	var weightRight, weightLeft, weightUp, weightDown = 0.0, 0.0, 0.0, 0.0
 	head := headOfSnake(state)
 	maxDist := state.Board.Width + state.Board.Height - 2
 	for _, snake := range state.Board.Snakes {
@@ -161,52 +161,66 @@ func (m AvoidBiggerSnakes) move(state b.GameState, scorecard *Scorecard) {
 
 		// Incentivize moves away from the bigger snake
 		if head.X > snake.Head.X {
-			rightWeight += weight
+			weightRight += weight
 		} else {
-			leftWeight += weight
+			weightLeft += weight
 		}
 		if head.Y > snake.Head.Y {
-			aboveWeight += weight
+			weightUp += weight
 		} else {
-			belowWeight += weight
+			weightDown += weight
 		}
 	}
 
 	// Update the scorecard
-	scorecard.Add(b.RIGHT, Score(rightWeight))
-	scorecard.Add(b.LEFT, Score(leftWeight))
-	scorecard.Add(b.UP, Score(aboveWeight))
-	scorecard.Add(b.DOWN, Score(belowWeight))
+	scorecard.Add(b.RIGHT, Score(weightRight))
+	scorecard.Add(b.LEFT, Score(weightLeft))
+	scorecard.Add(b.UP, Score(weightUp))
+	scorecard.Add(b.DOWN, Score(weightDown))
 
 	debug(state).Msgf("Moving away from snakes %s=%f, %s=%f, %s=%f, %s=%f",
-		b.LEFT, leftWeight, b.RIGHT, rightWeight, b.UP, aboveWeight, b.DOWN, belowWeight)
+		b.LEFT, weightLeft, b.RIGHT, weightRight, b.UP, weightUp, b.DOWN, weightDown)
 }
 
+// AvoidDeadEnds allows a snake to avoid dead ends.
 type AvoidDeadEnds struct {
+}
+
+func (m AvoidDeadEnds) move(state b.GameState, scorecard *Scorecard) {
+	board := NewBoard(state)
+	head := headOfSnake(state)
+	spaceToRight := availableSpace(head.Right(), board)
+	if spaceToRight < state.You.Length {
+
+	}
+}
+
+// MoveToSpace allows a snake to move towards areas with more available space.
+type MoveToSpace struct {
 	weight float64
 }
 
-func (a AvoidDeadEnds) move(state b.GameState, scorecard *Scorecard) {
+func (a MoveToSpace) move(state b.GameState, scorecard *Scorecard) {
 	board := NewBoard(state)
 	head := headOfSnake(state)
 
-	spaceRight := availableSpace(head.Right(), board) * a.weight
-	scorecard.Add(b.RIGHT, Score(spaceRight))
+	weightRight := float64(availableSpace(head.Right(), board)) * a.weight
+	scorecard.Add(b.RIGHT, Score(weightRight))
 
-	spaceLeft := availableSpace(head.Left(), board) * a.weight
-	scorecard.Add(b.LEFT, Score(spaceLeft))
+	weightLeft := float64(availableSpace(head.Left(), board)) * a.weight
+	scorecard.Add(b.LEFT, Score(weightLeft))
 
-	spaceBelow := availableSpace(head.Down(), board) * a.weight
-	scorecard.Add(b.DOWN, Score(spaceBelow))
+	weightDown := float64(availableSpace(head.Down(), board)) * a.weight
+	scorecard.Add(b.DOWN, Score(weightDown))
 
-	spaceAbove := availableSpace(head.Up(), board) * a.weight
-	scorecard.Add(b.UP, Score(spaceAbove))
+	weightUp := float64(availableSpace(head.Up(), board)) * a.weight
+	scorecard.Add(b.UP, Score(weightUp))
 
 	debug(state).Msgf("Moving to space %s=%f, %s=%f, %s=%f, %s=%f",
-		b.LEFT, spaceLeft, b.RIGHT, spaceRight, b.UP, spaceAbove, b.DOWN, spaceBelow)
+		b.LEFT, weightLeft, b.RIGHT, weightRight, b.UP, weightUp, b.DOWN, weightDown)
 }
 
-func availableSpace(start b.Coord, board *Board) float64 {
+func availableSpace(start b.Coord, board *Board) int {
 	visited := make(map[b.Coord]bool, 0)
 	space := 0
 	toVisit := make([]b.Coord, 0)
@@ -217,14 +231,13 @@ func availableSpace(start b.Coord, board *Board) float64 {
 		// Avoid revisiting squares
 		if !visited[curr] {
 			visited[curr] = true
-
 			if board.isEmpty(curr) {
 				space += 1
 				toVisit = append(toVisit, curr.Right(), curr.Left(), curr.Up(), curr.Down())
 			}
 		}
 	}
-	return float64(space)
+	return space
 }
 
 type Board struct {
