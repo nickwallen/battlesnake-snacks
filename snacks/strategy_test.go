@@ -544,8 +544,9 @@ func Test_AvoidDeadEnds_DeadEnd(t *testing.T) {
 					Body: []b.Coord{
 						{2, 1},
 						{1, 1},
+						{0, 1},
 					},
-					Length: 2,
+					Length: 3,
 				},
 			},
 			Hazards: []b.Coord{
@@ -561,8 +562,9 @@ func Test_AvoidDeadEnds_DeadEnd(t *testing.T) {
 			Body: []b.Coord{
 				{2, 1},
 				{1, 1},
+				{0, 1},
 			},
-			Length: 2,
+			Length: 3,
 		},
 	}
 	scorecard := NewScorecard(state)
