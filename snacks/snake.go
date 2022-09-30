@@ -54,8 +54,8 @@ func NewLatestSnake() *StrategyDrivenSnake {
 		name:   "Latest Snack",
 		author: "nickwallen",
 		color:  "#256D7B",
-		head:   "regular",
-		tail:   "regular",
+		head:   "ski",
+		tail:   "coffee",
 		strategies: []strategy{
 			&StayInBounds{},
 			&NoCollisions{},
