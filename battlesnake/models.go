@@ -72,7 +72,6 @@ type RulesetSettings struct {
 }
 
 // Response Objects
-// https://docs.battlesnake.com/api
 
 type InfoResponse struct {
 	APIVersion string `json:"apiversion"`
