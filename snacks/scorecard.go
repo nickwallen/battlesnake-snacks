@@ -60,7 +60,7 @@ func (s *Scorecard) Best() b.Move {
 			bestMove = move
 		}
 	}
-	logger(s.state).Msgf("Chose best move from %v", s.moves)
+	logger(s.state).Msgf("Chose %s as best from %v", bestMove, s.moves)
 	return bestMove
 }
 
@@ -78,4 +78,42 @@ func (s *Scorecard) Scores() map[b.Move]Score {
 		moves[k] = v
 	}
 	return moves
+}
+
+type LoggingScorecard struct {
+	label     string      // the label prefixed to all logging
+	state     b.GameState // the game state
+	scorecard *Scorecard  // the actual scorecard
+}
+
+func NewLoggingScorecard(label string, state b.GameState, scorecard *Scorecard) *LoggingScorecard {
+	return &LoggingScorecard{
+		label:     label,
+		state:     state,
+		scorecard: scorecard,
+	}
+}
+
+func (s *LoggingScorecard) Add(move b.Move, toAdd Score) Score {
+	debug(s.state).Msgf("%s: %s +%d", s.label, move, toAdd)
+	return s.scorecard.Add(move, toAdd)
+}
+
+// Unsafe Marks a move as unsafe.
+func (s *LoggingScorecard) Unsafe(move b.Move) {
+	debug(s.state).Msgf("%s: Unsafe to move %s", s.label, move)
+	s.scorecard.Unsafe(move)
+}
+
+// Best Returns the move with the best score.
+func (s *LoggingScorecard) Best() b.Move {
+	return s.scorecard.Best()
+}
+
+func (s *LoggingScorecard) SafeMoves() []b.Move {
+	return s.scorecard.SafeMoves()
+}
+
+func (s *LoggingScorecard) Scores() map[b.Move]Score {
+	return s.scorecard.Scores()
 }

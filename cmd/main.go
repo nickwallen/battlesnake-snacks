@@ -28,11 +28,13 @@ func main() {
 	var snake *snacks.StrategyDrivenSnake
 	switch os.Getenv(EnvSnake) {
 	case "DUMB":
-		snake = snacks.NewDumbSnake()
+		snake = snacks.DumbSnake()
 	case "HUNGRY":
-		snake = snacks.NewHungrySnake()
-	case "LATEST":
-		snake = snacks.NewLatestSnake()
+		snake = snacks.HungrySnake()
+	case "SOLO":
+		snake = snacks.SoloSurvivalSnake()
+	case "BATTLE":
+		snake = snacks.BattleSnake()
 	default:
 		log.Fatal().Msgf("Env var '%s' is missing.", EnvSnake)
 	}

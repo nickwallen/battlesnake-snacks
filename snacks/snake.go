@@ -19,7 +19,7 @@ type StrategyDrivenSnake struct {
 	strategies []strategy
 }
 
-func NewDumbSnake() *StrategyDrivenSnake {
+func DumbSnake() *StrategyDrivenSnake {
 	return &StrategyDrivenSnake{
 		name:   "dumb",
 		author: "nickwallen",
@@ -33,7 +33,7 @@ func NewDumbSnake() *StrategyDrivenSnake {
 	}
 }
 
-func NewHungrySnake() *StrategyDrivenSnake {
+func HungrySnake() *StrategyDrivenSnake {
 	return &StrategyDrivenSnake{
 		name:   "hungry",
 		author: "nickwallen",
@@ -49,9 +49,25 @@ func NewHungrySnake() *StrategyDrivenSnake {
 	}
 }
 
-func NewLatestSnake() *StrategyDrivenSnake {
+func SoloSurvivalSnake() *StrategyDrivenSnake {
 	return &StrategyDrivenSnake{
-		name:   "Latest Snack",
+		name:   "Solo Survival",
+		author: "nickwallen",
+		color:  "#256D7B",
+		head:   "ski",
+		tail:   "coffee",
+		strategies: []strategy{
+			&StayInBounds{},
+			&NoCollisions{},
+			&MoveToWalls{weight: 2.0},
+			&AvoidDeadEnds{},
+		},
+	}
+}
+
+func BattleSnake() *StrategyDrivenSnake {
+	return &StrategyDrivenSnake{
+		name:   "BattleSnack",
 		author: "nickwallen",
 		color:  "#256D7B",
 		head:   "ski",

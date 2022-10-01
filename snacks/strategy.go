@@ -11,11 +11,12 @@ var (
 	ErrNoFood         = errors.New("no food found")
 )
 
-// StayInBounds A strategy that kee[s the snake within the game boundaries.
+// StayInBounds A strategy that keeps the snake within the game boundaries.
 type StayInBounds struct {
 }
 
-func (s *StayInBounds) move(state b.GameState, scorecard *Scorecard) {
+func (s *StayInBounds) move(state b.GameState, card *Scorecard) {
+	scorecard := NewLoggingScorecard("stay-in-bounds", state, card)
 	head := headOfSnake(state)
 	if head.Right().X >= state.Board.Width || head.Right().Y < 0 {
 		scorecard.Unsafe(b.RIGHT)
@@ -35,7 +36,7 @@ func (s *StayInBounds) move(state b.GameState, scorecard *Scorecard) {
 type NoCollisions struct {
 }
 
-func (a *NoCollisions) move(state b.GameState, scorecard *Scorecard) {
+func (a *NoCollisions) move(state b.GameState, card *Scorecard) {
 	var avoid []b.Coord
 
 	// Avoid self collisions, other snakes and hazards
@@ -51,6 +52,7 @@ func (a *NoCollisions) move(state b.GameState, scorecard *Scorecard) {
 		avoid = append(avoid, hazard)
 	}
 
+	scorecard := NewLoggingScorecard("no-collisions", state, card)
 	head := headOfSnake(state)
 	for _, square := range avoid {
 		if head.Right() == square {
@@ -73,7 +75,7 @@ type MoveToClosestFood struct {
 	weight Score
 }
 
-func (m MoveToClosestFood) move(state b.GameState, scorecard *Scorecard) {
+func (m MoveToClosestFood) move(state b.GameState, card *Scorecard) {
 	head := headOfSnake(state)
 	closestFood, err := findNearbyFood(state, head)
 	if err == ErrNoFood {
@@ -81,6 +83,7 @@ func (m MoveToClosestFood) move(state b.GameState, scorecard *Scorecard) {
 	}
 
 	// Incentivize moves that take us closer to the food
+	scorecard := NewLoggingScorecard("move-to-closest-food", state, card)
 	if head.X > closestFood.X {
 		scorecard.Add(b.LEFT, m.weight)
 	}
@@ -117,7 +120,8 @@ type MoveToCenter struct {
 	weight float64
 }
 
-func (m *MoveToCenter) move(state b.GameState, scorecard *Scorecard) {
+func (m *MoveToCenter) move(state b.GameState, card *Scorecard) {
+	scorecard := NewLoggingScorecard("move-to-center", state, card)
 	head := headOfSnake(state)
 	centerX := float64(state.Board.Width) / float64(2)
 	offsetX := float64(head.X) - centerX
@@ -137,12 +141,38 @@ func (m *MoveToCenter) move(state b.GameState, scorecard *Scorecard) {
 	}
 }
 
+// MoveToWalls allows a snake to remain close to the outer walls.
+type MoveToWalls struct {
+	weight float64
+}
+
+func (m *MoveToWalls) move(state b.GameState, card *Scorecard) {
+	scorecard := NewLoggingScorecard("move-to-walls", state, card)
+	head := headOfSnake(state)
+	centerX := float64(state.Board.Width) / float64(2)
+	offsetX := float64(head.X) - centerX
+	if offsetX < 0 {
+		scorecard.Add(b.LEFT, Score(m.weight*-offsetX))
+	}
+	if offsetX > 0 {
+		scorecard.Add(b.RIGHT, Score(m.weight*offsetX))
+	}
+	centerY := float64(state.Board.Height) / float64(2)
+	offsetY := float64(head.Y) - centerY
+	if offsetY < 0 {
+		scorecard.Add(b.DOWN, Score(m.weight*-offsetY))
+	}
+	if offsetY > 0 {
+		scorecard.Add(b.UP, Score(m.weight*offsetY))
+	}
+}
+
 // AvoidBiggerSnakes allows a snake to move away from larger snakes
 type AvoidBiggerSnakes struct {
 	weight float64
 }
 
-func (m AvoidBiggerSnakes) move(state b.GameState, scorecard *Scorecard) {
+func (m AvoidBiggerSnakes) move(state b.GameState, card *Scorecard) {
 	var weightRight, weightLeft, weightUp, weightDown = 0.0, 0.0, 0.0, 0.0
 	head := headOfSnake(state)
 	maxDist := state.Board.Width + state.Board.Height - 2
@@ -173,6 +203,7 @@ func (m AvoidBiggerSnakes) move(state b.GameState, scorecard *Scorecard) {
 	}
 
 	// Update the scorecard
+	scorecard := NewLoggingScorecard("avoid-bigger-snakes", state, card)
 	scorecard.Add(b.RIGHT, Score(weightRight))
 	scorecard.Add(b.LEFT, Score(weightLeft))
 	scorecard.Add(b.UP, Score(weightUp))
@@ -186,20 +217,20 @@ func (m AvoidBiggerSnakes) move(state b.GameState, scorecard *Scorecard) {
 type AvoidDeadEnds struct {
 }
 
-func (m AvoidDeadEnds) move(state b.GameState, scorecard *Scorecard) {
+func (m AvoidDeadEnds) move(state b.GameState, card *Scorecard) {
 	board := NewBoard(state)
 	head := headOfSnake(state)
-
+	scorecard := NewLoggingScorecard("avoid-dead-ends", state, card)
 	spaceLeft := availableSpace(head.Left(), board)
 	if spaceLeft < state.You.Length {
 		scorecard.Unsafe(b.LEFT)
-		debug(state).Msgf("Dead-end to the left! Have %d square(s), need %d", spaceLeft, state.You.Length)
+		debug(state).Msgf("Dead-end left! Have %d square(s), need %d", spaceLeft, state.You.Length)
 	}
 
 	spaceRight := availableSpace(head.Right(), board)
 	if spaceRight < state.You.Length {
 		scorecard.Unsafe(b.RIGHT)
-		debug(state).Msgf("Dead-end to the right! Have %d square(s), need %d", spaceRight, state.You.Length)
+		debug(state).Msgf("Dead-end right! Have %d square(s), need %d", spaceRight, state.You.Length)
 	}
 
 	spaceUp := availableSpace(head.Up(), board)
@@ -220,9 +251,10 @@ type MoveToSpace struct {
 	weight float64
 }
 
-func (a MoveToSpace) move(state b.GameState, scorecard *Scorecard) {
+func (a MoveToSpace) move(state b.GameState, card *Scorecard) {
 	board := NewBoard(state)
 	head := headOfSnake(state)
+	scorecard := NewLoggingScorecard("move-to-space", state, card)
 
 	weightRight := float64(availableSpace(head.Right(), board)) * a.weight
 	scorecard.Add(b.RIGHT, Score(weightRight))
@@ -313,7 +345,7 @@ type MoveToFood struct {
 	weight float64
 }
 
-func (m MoveToFood) move(state b.GameState, scorecard *Scorecard) {
+func (m MoveToFood) move(state b.GameState, card *Scorecard) {
 	var foodToRight, foodToLeft, foodAbove, foodBelow = 0.0, 0.0, 0.0, 0.0
 	head := headOfSnake(state)
 	maxDist := state.Board.Width + state.Board.Height - 2
@@ -335,11 +367,9 @@ func (m MoveToFood) move(state b.GameState, scorecard *Scorecard) {
 	}
 
 	// Update the scorecard
+	scorecard := NewLoggingScorecard("move-to-food", state, card)
 	scorecard.Add(b.RIGHT, Score(foodToRight))
 	scorecard.Add(b.LEFT, Score(foodToLeft))
 	scorecard.Add(b.UP, Score(foodAbove))
 	scorecard.Add(b.DOWN, Score(foodBelow))
-
-	debug(state).Msgf("Moving to food %s=%f, %s=%f, %s=%f, %s=%f",
-		b.LEFT, foodToLeft, b.RIGHT, foodToRight, b.UP, foodAbove, b.DOWN, foodBelow)
 }

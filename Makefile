@@ -3,7 +3,7 @@ test:
 	go test ./...
 
 run:
-	PORT=80 SNAKE=LATEST go run ./cmd
+	PORT=8000 SNAKE=BATTLE go run ./cmd
 
 battle:
 	battlesnake play \
@@ -11,4 +11,11 @@ battle:
 	  -g standard \
       --url http://localhost:8000 \
       --url http://localhost:8001 \
+      --browser
+
+solo:
+	battlesnake play \
+	  -W 7 -H 7 \
+	  -g standard \
+      --url http://localhost:8000 \
       --browser
