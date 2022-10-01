@@ -13,7 +13,18 @@ const (
 )
 
 func (m Move) String() string {
-	return string(m)
+	switch m {
+	case RIGHT:
+		return "⭢"
+	case LEFT:
+		return "⭠"
+	case UP:
+		return "⭡"
+	case DOWN:
+		return "⭣"
+	default:
+		return string(m)
+	}
 }
 
 type Body []Coord

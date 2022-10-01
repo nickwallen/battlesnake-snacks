@@ -613,3 +613,130 @@ func Test_AvoidDeadEnds_NotADeadEnd(t *testing.T) {
 	strategy.move(state, scorecard)
 	require.Contains(t, scorecard.SafeMoves(), b.RIGHT)
 }
+
+func Test_AttackSmallerSnakes_SmallerSnake(t *testing.T) {
+	state := b.GameState{
+		Board: b.Board{
+			Height: 5,
+			Width:  5,
+			Snakes: []b.Snake{
+				{
+					ID:     "smaller-snake",
+					Head:   b.Coord{3, 3},
+					Length: 2,
+				},
+				{
+					ID:     "you",
+					Head:   b.Coord{2, 2},
+					Length: 3,
+				},
+			},
+		},
+		You: b.Snake{
+			ID:     "you",
+			Head:   b.Coord{2, 2},
+			Length: 3,
+		},
+	}
+	scorecard := NewScorecard(state)
+	strategy := AttackSmallerSnakes{weight: 1.5}
+	strategy.move(state, scorecard)
+	require.Equal(t, Score(0), scorecard.Scores()[b.LEFT])
+	require.Equal(t, Score(0), scorecard.Scores()[b.DOWN])
+	require.Equal(t, Score(9), scorecard.Scores()[b.RIGHT])
+	require.Equal(t, Score(9), scorecard.Scores()[b.UP])
+}
+
+func Test_AttackSmallerSnakes_BiggerSnake(t *testing.T) {
+	state := b.GameState{
+		Board: b.Board{
+			Height: 5,
+			Width:  5,
+			Snakes: []b.Snake{
+				{
+					ID:     "bigger-snake",
+					Head:   b.Coord{3, 3},
+					Length: 5,
+				},
+				{
+					ID:     "you",
+					Head:   b.Coord{2, 2},
+					Length: 2,
+				},
+			},
+		},
+		You: b.Snake{
+			ID:     "you",
+			Head:   b.Coord{2, 2},
+			Length: 2,
+		},
+	}
+	scorecard := NewScorecard(state)
+	strategy := AttackSmallerSnakes{weight: 1.5}
+	strategy.move(state, scorecard)
+	require.Equal(t, Score(0), scorecard.Scores()[b.LEFT])
+	require.Equal(t, Score(0), scorecard.Scores()[b.DOWN])
+	require.Equal(t, Score(0), scorecard.Scores()[b.RIGHT])
+	require.Equal(t, Score(0), scorecard.Scores()[b.UP])
+}
+
+func Test_AttackSmallerSnakes_EqualSnake(t *testing.T) {
+	state := b.GameState{
+		Board: b.Board{
+			Height: 5,
+			Width:  5,
+			Snakes: []b.Snake{
+				{
+					ID:     "equal-size-snake",
+					Head:   b.Coord{3, 3},
+					Length: 2,
+				},
+				{
+					ID:     "you",
+					Head:   b.Coord{2, 2},
+					Length: 2,
+				},
+			},
+		},
+		You: b.Snake{
+			ID:     "you",
+			Head:   b.Coord{2, 2},
+			Length: 2,
+		},
+	}
+	scorecard := NewScorecard(state)
+	strategy := AttackSmallerSnakes{weight: 1.5}
+	strategy.move(state, scorecard)
+	require.Equal(t, Score(0), scorecard.Scores()[b.LEFT])
+	require.Equal(t, Score(0), scorecard.Scores()[b.DOWN])
+	require.Equal(t, Score(0), scorecard.Scores()[b.RIGHT])
+	require.Equal(t, Score(0), scorecard.Scores()[b.UP])
+}
+
+func Test_AttackSmallerSnakes_NoSnakes(t *testing.T) {
+	state := b.GameState{
+		Board: b.Board{
+			Height: 5,
+			Width:  5,
+			Snakes: []b.Snake{
+				{
+					ID:     "you",
+					Head:   b.Coord{2, 2},
+					Length: 2,
+				},
+			},
+		},
+		You: b.Snake{
+			ID:     "you",
+			Head:   b.Coord{2, 2},
+			Length: 2,
+		},
+	}
+	scorecard := NewScorecard(state)
+	strategy := AttackSmallerSnakes{weight: 1.5}
+	strategy.move(state, scorecard)
+	require.Equal(t, Score(0), scorecard.Scores()[b.LEFT])
+	require.Equal(t, Score(0), scorecard.Scores()[b.DOWN])
+	require.Equal(t, Score(0), scorecard.Scores()[b.RIGHT])
+	require.Equal(t, Score(0), scorecard.Scores()[b.UP])
+}

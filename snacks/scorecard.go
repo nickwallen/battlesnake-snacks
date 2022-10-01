@@ -95,13 +95,15 @@ func NewLoggingScorecard(label string, state b.GameState, scorecard *Scorecard) 
 }
 
 func (s *LoggingScorecard) Add(move b.Move, toAdd Score) Score {
-	debug(s.state).Msgf("%s: %s +%d", s.label, move, toAdd)
+	if toAdd != Score(0) {
+		debug(s.state).Msgf("%s: %s +%d", s.label, move, toAdd)
+	}
 	return s.scorecard.Add(move, toAdd)
 }
 
 // Unsafe Marks a move as unsafe.
 func (s *LoggingScorecard) Unsafe(move b.Move) {
-	debug(s.state).Msgf("%s: Unsafe to move %s", s.label, move)
+	debug(s.state).Msgf("%s: %s 🚫", s.label, move)
 	s.scorecard.Unsafe(move)
 }
 

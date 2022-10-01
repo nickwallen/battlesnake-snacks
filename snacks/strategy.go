@@ -208,9 +208,6 @@ func (m AvoidBiggerSnakes) move(state b.GameState, card *Scorecard) {
 	scorecard.Add(b.LEFT, Score(weightLeft))
 	scorecard.Add(b.UP, Score(weightUp))
 	scorecard.Add(b.DOWN, Score(weightDown))
-
-	debug(state).Msgf("Moving away from snakes %s=%f, %s=%f, %s=%f, %s=%f",
-		b.LEFT, weightLeft, b.RIGHT, weightRight, b.UP, weightUp, b.DOWN, weightDown)
 }
 
 // AvoidDeadEnds allows a snake to avoid dead ends.
@@ -254,22 +251,20 @@ type MoveToSpace struct {
 func (a MoveToSpace) move(state b.GameState, card *Scorecard) {
 	board := NewBoard(state)
 	head := headOfSnake(state)
+	totalSpaces := state.Board.Height * state.Board.Width
 	scorecard := NewLoggingScorecard("move-to-space", state, card)
 
-	weightRight := float64(availableSpace(head.Right(), board)) * a.weight
+	weightRight := float64(availableSpace(head.Right(), board)) / float64(totalSpaces) * 10 * a.weight
 	scorecard.Add(b.RIGHT, Score(weightRight))
 
-	weightLeft := float64(availableSpace(head.Left(), board)) * a.weight
+	weightLeft := float64(availableSpace(head.Left(), board)) / float64(totalSpaces) * 10 * a.weight
 	scorecard.Add(b.LEFT, Score(weightLeft))
 
-	weightDown := float64(availableSpace(head.Down(), board)) * a.weight
+	weightDown := float64(availableSpace(head.Down(), board)) / float64(totalSpaces) * 10 * a.weight
 	scorecard.Add(b.DOWN, Score(weightDown))
 
-	weightUp := float64(availableSpace(head.Up(), board)) * a.weight
+	weightUp := float64(availableSpace(head.Up(), board)) / float64(totalSpaces) * 10 * a.weight
 	scorecard.Add(b.UP, Score(weightUp))
-
-	debug(state).Msgf("Moving to space %s=%f, %s=%f, %s=%f, %s=%f",
-		b.LEFT, weightLeft, b.RIGHT, weightRight, b.UP, weightUp, b.DOWN, weightDown)
 }
 
 func availableSpace(start b.Coord, board *Board) int {
@@ -372,4 +367,46 @@ func (m MoveToFood) move(state b.GameState, card *Scorecard) {
 	scorecard.Add(b.LEFT, Score(foodToLeft))
 	scorecard.Add(b.UP, Score(foodAbove))
 	scorecard.Add(b.DOWN, Score(foodBelow))
+}
+
+type AttackSmallerSnakes struct {
+	weight float64
+}
+
+func (a AttackSmallerSnakes) move(state b.GameState, card *Scorecard) {
+	var weightRight, weightLeft, weightUp, weightDown = 0.0, 0.0, 0.0, 0.0
+	head := headOfSnake(state)
+	maxDist := state.Board.Width + state.Board.Height - 2
+	for _, snake := range state.Board.Snakes {
+		if state.You.Length <= snake.Length {
+			continue // Ignore bigger snakes
+		}
+		if snake.ID == state.You.ID {
+			continue // Ignore yourself
+		}
+
+		// The closer the snake is, the greater the incentive should be to attack
+		dist := head.DistanceTo(snake.Head)
+		weight := a.weight * float64(maxDist-dist)
+		debug(state).Msgf("Found smaller snake at %s, %d block(s) away", snake.Head, dist)
+
+		// Incentivize moves toward the smaller snake
+		if head.X > snake.Head.X {
+			weightLeft += weight
+		} else {
+			weightRight += weight
+		}
+		if head.Y > snake.Head.Y {
+			weightDown += weight
+		} else {
+			weightUp += weight
+		}
+	}
+
+	// Update the scorecard
+	scorecard := NewLoggingScorecard("attack-smaller-snakes", state, card)
+	scorecard.Add(b.RIGHT, Score(weightRight))
+	scorecard.Add(b.LEFT, Score(weightLeft))
+	scorecard.Add(b.UP, Score(weightUp))
+	scorecard.Add(b.DOWN, Score(weightDown))
 }

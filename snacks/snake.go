@@ -75,9 +75,10 @@ func BattleSnake() *StrategyDrivenSnake {
 		strategies: []strategy{
 			&StayInBounds{},
 			&NoCollisions{},
-			&MoveToFood{weight: 1.5},
-			&AvoidBiggerSnakes{weight: 1.5},
-			&MoveToSpace{weight: 1},
+			&MoveToFood{weight: 0.7},
+			&AvoidBiggerSnakes{weight: 1.8},
+			&MoveToSpace{weight: 3.0},
+			&AttackSmallerSnakes{weight: 1.2},
 		},
 	}
 }
