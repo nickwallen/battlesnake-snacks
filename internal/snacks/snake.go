@@ -21,7 +21,7 @@ type StrategyDrivenSnake struct {
 
 func DumbSnake() *StrategyDrivenSnake {
 	return &StrategyDrivenSnake{
-		name:   "dumb",
+		name:   "Dumb Snake",
 		author: "nickwallen",
 		color:  "#b5ca60",
 		head:   "dead",
@@ -35,7 +35,7 @@ func DumbSnake() *StrategyDrivenSnake {
 
 func HungrySnake() *StrategyDrivenSnake {
 	return &StrategyDrivenSnake{
-		name:   "hungry",
+		name:   "Hungry Snake",
 		author: "nickwallen",
 		color:  "#2F4538",
 		head:   "ski",
@@ -53,9 +53,9 @@ func SoloSurvivalSnake() *StrategyDrivenSnake {
 	return &StrategyDrivenSnake{
 		name:   "Solo Survival",
 		author: "nickwallen",
-		color:  "#256D7B",
-		head:   "ski",
-		tail:   "coffee",
+		color:  "#F54021",
+		head:   "regular",
+		tail:   "regular",
 		strategies: []strategy{
 			&StayInBounds{},
 			&NoCollisions{},
@@ -67,7 +67,7 @@ func SoloSurvivalSnake() *StrategyDrivenSnake {
 
 func BattleSnake() *StrategyDrivenSnake {
 	return &StrategyDrivenSnake{
-		name:   "BattleSnack",
+		name:   "Battle Snake",
 		author: "nickwallen",
 		color:  "#256D7B",
 		head:   "ski",
@@ -122,8 +122,7 @@ func (s *StrategyDrivenSnake) End(state battlesnake.GameState) {
 		}
 	}
 	logger(state).
-		Str("snake", s.name).
-		Msgf("%s in %d move(s)", gameResult, state.Turn+1)
+		Msgf("'%s' %s in %d move(s)", s.Name(), gameResult, state.Turn+1)
 }
 
 // Move is called on every turn and returns your next move

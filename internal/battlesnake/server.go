@@ -92,6 +92,6 @@ func RunServer(snake snake, port string) {
 		writer.Header().Set("Server", ServerID)
 		server.HandleEnd(writer, request)
 	})
-	log.Printf("Running %s at http://0.0.0.0:%s...\n", snake.Name(), port)
+	log.Printf("Running '%s' at http://0.0.0.0:%s...\n", snake.Name(), port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

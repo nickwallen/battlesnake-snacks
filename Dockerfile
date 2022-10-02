@@ -15,6 +15,6 @@ RUN go mod download && \
 COPY cmd ./cmd
 COPY internal/ ./internal
 RUN go test ./... && \
-    go build -v -o /usr/local/bin/app ./cmd
+    go build -v -o /usr/local/bin/snake ./cmd/snake
 
-CMD ["/usr/local/bin/app"]
+CMD ["/usr/local/bin/snake"]

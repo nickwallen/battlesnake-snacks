@@ -15,7 +15,7 @@ services:
     build: .
     environment:
       PORT: "8002"
-      SNAKE: "BATTLE"
+      SNAKE: "SOLO"
     ports:
       - "8002:8002"
     container_name: battle-snack-2
@@ -25,7 +25,7 @@ services:
     build: .
     environment:
       PORT: "8003"
-      SNAKE: "BATTLE"
+      SNAKE: "HUNGRY"
     ports:
       - "8003:8003"
     container_name: battle-snack-3

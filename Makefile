@@ -2,8 +2,8 @@
 test:
 	go test ./...
 
-run:
-	PORT=8000 SNAKE=BATTLE go run ./cmd
+snakes:
+	docker-compose up --build
 
 battle:
 	battlesnake play \
