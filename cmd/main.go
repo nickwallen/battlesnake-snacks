@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/nickwallen/battlesnake-snacks/battlesnake"
-	"github.com/nickwallen/battlesnake-snacks/snacks"
+	"github.com/nickwallen/battlesnake-snacks/internal/battlesnake"
+	"github.com/nickwallen/battlesnake-snacks/internal/snacks"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"os"
@@ -36,7 +36,7 @@ func main() {
 	case "BATTLE":
 		snake = snacks.BattleSnake()
 	default:
-		log.Fatal().Msgf("Env var '%s' is missing.", EnvSnake)
+		log.Fatal().Msgf("Unexpected value '%s' for env var '%s'.", os.Getenv(EnvSnake), EnvSnake)
 	}
 
 	battlesnake.RunServer(snake, port)

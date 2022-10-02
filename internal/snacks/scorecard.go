@@ -2,7 +2,7 @@ package snacks
 
 import (
 	"fmt"
-	b "github.com/nickwallen/battlesnake-snacks/battlesnake"
+	b "github.com/nickwallen/battlesnake-snacks/internal/battlesnake"
 	"math"
 )
 

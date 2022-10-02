@@ -1,13 +1,13 @@
 package snacks
 
 import (
-	b "github.com/nickwallen/battlesnake-snacks/battlesnake"
+	"github.com/nickwallen/battlesnake-snacks/internal/battlesnake"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
 type strategy interface {
-	move(state b.GameState, scorecard *Scorecard)
+	move(state battlesnake.GameState, scorecard *Scorecard)
 }
 
 type StrategyDrivenSnake struct {
@@ -83,11 +83,15 @@ func BattleSnake() *StrategyDrivenSnake {
 	}
 }
 
+func (s *StrategyDrivenSnake) Name() string {
+	return s.name
+}
+
 // Info is called when you create your Battlesnake on play.b.com
 // and controls your Battlesnake's appearance
 // TIP: If you open your Battlesnake URL in a browser you should see this data
-func (s *StrategyDrivenSnake) Info() b.InfoResponse {
-	return b.InfoResponse{
+func (s *StrategyDrivenSnake) Info() battlesnake.InfoResponse {
+	return battlesnake.InfoResponse{
 		APIVersion: "1",
 		Author:     s.author,
 		Color:      s.color,
@@ -97,14 +101,14 @@ func (s *StrategyDrivenSnake) Info() b.InfoResponse {
 }
 
 // Start is called when your Battlesnake begins a game
-func (s *StrategyDrivenSnake) Start(state b.GameState) {
+func (s *StrategyDrivenSnake) Start(state battlesnake.GameState) {
 	logger(state).
 		Str("snake", s.name).
 		Msg("start")
 }
 
 // End is called when your Battlesnake finishes a game
-func (s *StrategyDrivenSnake) End(state b.GameState) {
+func (s *StrategyDrivenSnake) End(state battlesnake.GameState) {
 	var gameResult string
 	isDraw := len(state.Board.Snakes) == 0
 	if isDraw {
@@ -125,17 +129,17 @@ func (s *StrategyDrivenSnake) End(state b.GameState) {
 // Move is called on every turn and returns your next move
 // Valid moves are UP, DOWN, LEFT, or RIGHT
 // See https://docs.b.com/api/example-move for available data
-func (s *StrategyDrivenSnake) Move(state b.GameState) b.MoveResponse {
+func (s *StrategyDrivenSnake) Move(state battlesnake.GameState) battlesnake.MoveResponse {
 	scorecard := NewScorecard(state)
 	for _, strategy := range s.strategies {
 		strategy.move(state, scorecard)
 	}
 	move := scorecard.Best()
 	logger(state).Stringer("move", move).Msg("moved")
-	return b.MoveResponse{Move: move}
+	return battlesnake.MoveResponse{Move: move}
 }
 
-func logger(state b.GameState) *zerolog.Event {
+func logger(state battlesnake.GameState) *zerolog.Event {
 	event := log.Info().
 		Str("game-id", state.Game.ID).
 		Int("turn", state.Turn).
@@ -145,7 +149,7 @@ func logger(state b.GameState) *zerolog.Event {
 	return event
 }
 
-func debug(state b.GameState) *zerolog.Event {
+func debug(state battlesnake.GameState) *zerolog.Event {
 	event := log.Debug().
 		Str("game-id", state.Game.ID).
 		Int("turn", state.Turn).
@@ -154,6 +158,6 @@ func debug(state b.GameState) *zerolog.Event {
 }
 
 // head Returns the coordinates of the snake's head.
-func headOfSnake(state b.GameState) b.Coord {
+func headOfSnake(state battlesnake.GameState) battlesnake.Coord {
 	return state.You.Head
 }

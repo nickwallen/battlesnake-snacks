@@ -1,7 +1,7 @@
 FROM golang:1.18
 
+ENV SNACK=BATTLE
 ENV PORT=8000
-ENV SNAKE=LATEST
 
 WORKDIR /usr/src/app
 
@@ -13,8 +13,8 @@ RUN go mod download && \
 
 # Build
 COPY cmd ./cmd
-COPY snacks ./snacks
+COPY internal/ ./internal
 RUN go test ./... && \
     go build -v -o /usr/local/bin/app ./cmd
 
-CMD ["app"]
+CMD ["/usr/local/bin/app"]

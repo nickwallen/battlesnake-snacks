@@ -7,6 +7,7 @@ import (
 )
 
 type snake interface {
+	Name() string
 	Info() InfoResponse
 	Start(state GameState)
 	End(state GameState)
@@ -91,6 +92,6 @@ func RunServer(snake snake, port string) {
 		writer.Header().Set("Server", ServerID)
 		server.HandleEnd(writer, request)
 	})
-	log.Printf("Running Snake at http://0.0.0.0:%s...\n", port)
+	log.Printf("Running %s at http://0.0.0.0:%s...\n", snake.Name(), port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
